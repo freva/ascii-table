@@ -99,6 +99,9 @@ public class AsciiTable {
         return lines;
     }
 
+    /**
+     * Returns a line/border row in the resulting table
+     */
     private static String lineRow(int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) {
         final StringBuilder row = new StringBuilder(getTableWidth(colWidths));
         if (left != null) row.append((char) left);
@@ -110,6 +113,12 @@ public class AsciiTable {
         return row.toString();
     }
 
+    /**
+     * Returns list of rows in resulting table for a given header/data row. A single header/data row may produce
+     * multiple rows in the resulting table if:
+     *  - Contents of a row exceed maxCharInLine for that row
+     *  - Contents of a row we're already multiline
+     */
     private static List<String> dataRow(int[] colWidths, HorizontalAlign[] horizontalAligns, String[] contents,
                                  Character left, Character columnSeparator, Character right) {
         final List<List<String>> linesContents = IntStream.range(0, colWidths.length)
@@ -141,6 +150,9 @@ public class AsciiTable {
         return lines;
     }
 
+    /**
+     * Returns the width of each column in the resulting table.
+     */
     private static int[] getColWidths(Column[] columns, String[][] data) {
         final int numColumns = getNumColumns(columns, data);
         final int[] result = new int[numColumns];
@@ -158,6 +170,9 @@ public class AsciiTable {
         return result;
     }
 
+    /**
+     * Returns maximum number of columns between the header or any of the data rows.
+     */
     private static int getNumColumns(Column[] columns, String[][] data) {
         final int maxDataColumns = Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
@@ -166,10 +181,23 @@ public class AsciiTable {
         return Math.max(columns.length, maxDataColumns);
     }
 
+    /**
+     * Returns the width of each line in resulting table not counting the line break character(s).
+     */
     private static int getTableWidth(int[] colWidths) {
         return Arrays.stream(colWidths).sum() + MIN_PADDING * (colWidths.length + 1) - 1;
     }
 
+    /**
+     * Splits a string into multiple strings each of which length is <= maxCharInLine. The splitting is done by
+     * space character if possible, otherwise a word is broken at exactly maxCharInLine.
+     * This method preserves all spaces except the one it splits on, for example:
+     * string "here is    a  strange string" split on length 8 gives: ["here is ", "  a ", "strange", "string"]
+     *
+     * @param str String to split
+     * @param maxCharInLine Max length of each split
+     * @return List of string that form original string, but each string is as-short-or-shorter than maxCharInLine
+     */
     static List<String> splitTextIntoLinesOfMaxLength(String str, int maxCharInLine) {
         final List<String> lines = new LinkedList<>();
         final StringBuilder line = new StringBuilder(maxCharInLine);
@@ -196,11 +224,22 @@ public class AsciiTable {
         return lines;
     }
 
-    static char[] justify(String str, HorizontalAlign orientation, int length, int minPadding) {
+    /**
+     * Justify the string to a given horizontal alignment by padding it with spaces. Before justifying the string,
+     * a minimum padding is applied to both sides. The new length is the total length, including the min padding. If
+     * passed string is already of length or longer, the string is returned unaltered.
+     *
+     * @param str String to justify
+     * @param align Horizontal alignment
+     * @param length Total new length
+     * @param minPadding Length of padding to apply from both left and right before justifying
+     * @return Justified string's char array
+     */
+    static char[] justify(String str, HorizontalAlign align, int length, int minPadding) {
         if (str.length() < length) {
             final char[] justified = new char[length];
             Arrays.fill(justified, ' ');
-            switch (orientation) {
+            switch (align) {
                 case LEFT:
                     System.arraycopy(str.toCharArray(), 0, justified, minPadding, str.length());
                     break;

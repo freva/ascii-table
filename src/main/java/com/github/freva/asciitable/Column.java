@@ -35,16 +35,25 @@ public class Column {
         return maxColumnWidth;
     }
 
+    /**
+     * Sets horizontal alignment of the header cell for this column
+     */
     public Column headerAlign(HorizontalAlign headerAlign) {
         this.headerAlign = headerAlign;
         return this;
     }
 
+    /**
+     * Sets horizontal alignment of all the data cells for this column
+     */
     public Column dataAlign(HorizontalAlign dataAlign) {
         this.dataAlign = dataAlign;
         return this;
     }
 
+    /**
+     * Max width of this column, if data exceeds this length, it will be broken into multiple lines
+     */
     public Column maxColumnWidth(int maxColumnWidth) {
         this.maxColumnWidth = maxColumnWidth;
         return this;
