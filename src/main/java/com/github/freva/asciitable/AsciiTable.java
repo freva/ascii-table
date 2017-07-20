@@ -12,18 +12,21 @@ public class AsciiTable {
 
     public static final Character[] NO_BORDERS = new Character[22];
 
-    public static final Character[] BASIC_ASCII_WITH_OUTSIDE_BORDER = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
+    public static final Character[] BASIC_ASCII = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
             '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+'};
 
-    public static final Character[] BASIC_ASCII_WITHOUT_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
+    public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
+            '+', '+', '|', '|', '|', null, null, null, null, '+', '-', '+', '+'};
+
+    public static final Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
             null, '-', '+', null, null, '|', null, null, '-', '+', null, null, null, null, null};
 
-    public static final Character[] FANCY_ASCII_WITH_OUTSIDE_BORDER = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
+    public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╚', '═', '╧', '╝'};
 
 
     public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
-        return getTable(BASIC_ASCII_WITH_OUTSIDE_BORDER, objects, columns);
+        return getTable(BASIC_ASCII, objects, columns);
     }
 
     public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns) {
@@ -38,7 +41,7 @@ public class AsciiTable {
     }
 
     public static String getTable(String[] header, String[][] data) {
-        return getTable(BASIC_ASCII_WITH_OUTSIDE_BORDER, header, data);
+        return getTable(BASIC_ASCII, header, data);
     }
 
     public static String getTable(Character[] borderChars, String[] header, String[][] data) {
@@ -50,7 +53,7 @@ public class AsciiTable {
     }
 
     public static String getTable(Column[] columns, String[][] data) {
-        return getTable(BASIC_ASCII_WITH_OUTSIDE_BORDER, columns, data);
+        return getTable(BASIC_ASCII, columns, data);
     }
 
     public static String getTable(Character[] borderChars, Column[] columns, String[][] data) {

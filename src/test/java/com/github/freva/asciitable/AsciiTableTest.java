@@ -50,8 +50,8 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultWithoutOuterBorder() {
-        String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_WITHOUT_OUTSIDE_BORDER, planets, Arrays.asList(
+    public void testTableDefaultNoOutsideBorder() {
+        String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER, planets, Arrays.asList(
                 new Column("").with(planet -> Integer.toString(planet.num)),
                 new Column("Name").with(planet -> planet.name),
                 new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
@@ -72,7 +72,28 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultWithoutBorders() {
+    public void testTableDefaultNoDataSeparators() {
+        String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_DATA_SEPARATORS, planets, Arrays.asList(
+                new Column("").with(planet -> Integer.toString(planet.num)),
+                new Column("Name").with(planet -> planet.name),
+                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
+                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+
+        String expected = String.join(System.lineSeparator(),
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 1 | Mercury |    0.382 | 0.06 |                         minimal |",
+                "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testTableDefaultNoBorders() {
         String actual = AsciiTable.getTable(AsciiTable.NO_BORDERS, planets, Arrays.asList(
                 new Column("").with(planet -> Integer.toString(planet.num)),
                 new Column("Name").with(planet -> planet.name),
@@ -91,7 +112,7 @@ public class AsciiTableTest {
 
     @Test
     public void testTableDefaultFancyBorders() {
-        String actual = AsciiTable.getTable(AsciiTable.FANCY_ASCII_WITH_OUTSIDE_BORDER, planets, Arrays.asList(
+        String actual = AsciiTable.getTable(AsciiTable.FANCY_ASCII, planets, Arrays.asList(
                 new Column("").with(planet -> Integer.toString(planet.num)),
                 new Column("Name").with(planet -> planet.name),
                 new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
