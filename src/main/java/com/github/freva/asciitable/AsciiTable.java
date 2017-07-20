@@ -18,6 +18,9 @@ public class AsciiTable {
     public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
             '+', '+', '|', '|', '|', null, null, null, null, '+', '-', '+', '+'};
 
+    public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER = {null, null, null, null, null,
+            '|', null, null, '-', '+', null, null, '|', null, null, null, null, null, null, null, null, null};
+
     public static final Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
             null, '-', '+', null, null, '|', null, null, '-', '+', null, null, null, null, null};
 
