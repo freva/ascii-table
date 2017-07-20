@@ -223,6 +223,22 @@ public class AsciiTableTest {
     }
 
     @Test
+    public void testValidateNullInData() {
+        String[] headers = {"Lorem", "Ipsum", "Dolor"};
+        String[][] data = {{"11", "12", "13"}, {"21", null, "23"}};
+        String actual = AsciiTable.getTable(headers, data);
+        String expected = String.join(System.lineSeparator(),
+                "+-------+-------+-------+",
+                "| Lorem | Ipsum | Dolor |",
+                "+-------+-------+-------+",
+                "|    11 |    12 |    13 |",
+                "+-------+-------+-------+",
+                "|    21 |       |    23 |",
+                "+-------+-------+-------+");
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testValidateDifferentSizedHeaderDataColumns() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
 

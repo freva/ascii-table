@@ -123,7 +123,7 @@ public class AsciiTable {
                                  Character left, Character columnSeparator, Character right) {
         final List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
-                    String text = i < contents.length ? contents[i] : "";
+                    String text = i < contents.length && contents[i] != null ? contents[i] : "";
                     String[] paragraphs = text.split(System.lineSeparator());
                     return Arrays.stream(paragraphs)
                             .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* MIN_PADDING).stream())
@@ -159,7 +159,7 @@ public class AsciiTable {
 
         for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                result[col] = Math.max(result[col], dataRow[col].length());
+                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].length());
             }
         }
 
