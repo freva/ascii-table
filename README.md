@@ -3,6 +3,20 @@ Easily create and customize simple ASCII tables in Java. Based off
 [nedtwigg/asciitable](https://github.com/nedtwigg/asciitable) and 
 [klaus31/ascii-art-table](https://github.com/klaus31/ascii-art-table).
 
+## How to get it?
+Maven:
+```
+<dependency>
+  <groupId>com.github,freva</groupId>
+  <artifactId>ascii-table</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+Gradle:
+```
+compile 'com.github.freva:ascii-table:1.0.0'
+```
+
 ## Basic case
 ```
 String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
