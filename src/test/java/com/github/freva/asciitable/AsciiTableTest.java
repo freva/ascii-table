@@ -19,19 +19,48 @@ public class AsciiTableTest {
 
     @Test
     public void testTableDefault() {
+        String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
+                {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
+                {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
+                {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
+
+        String actualArray = AsciiTable.getTable(data);
+        String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().with(planet -> planet.name),
+                new Column().with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().with(planet -> String.format("%.02f", planet.mass)),
+                new Column().with(planet -> planet.atmosphere)));
+
+        String expected = String.join(System.lineSeparator(),
+                "+---+---------+-------+------+---------------------------------+",
+                "| 1 | Mercury | 0.382 | 0.06 |                         minimal |",
+                "+---+---------+-------+------+---------------------------------+",
+                "| 2 |   Venus | 0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "+---+---------+-------+------+---------------------------------+",
+                "| 3 |   Earth | 1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "+---+---------+-------+------+---------------------------------+",
+                "| 4 |    Mars | 0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+-------+------+---------------------------------+");
+        assertEquals(expected, actualArray);
+        assertEquals(expected, actualObjects);
+    }
+
+    @Test
+    public void testTableWithHeader() {
         String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
         String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
                 {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
                 {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
                 {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
 
-        String actualArray = AsciiTable.getTable(headers, data);
+        String actualArray = AsciiTable.getTable(headers, null, data);
         String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").with(planet -> planet.name),
+                new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "+---+---------+----------+------+---------------------------------+",
@@ -50,13 +79,51 @@ public class AsciiTableTest {
     }
 
     @Test
+    public void testTableWithHeaderAndFooter() {
+        String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
+        String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
+                {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
+                {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
+                {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
+
+        String actualArray = AsciiTable.getTable(headers, headers, data);
+        String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Name").with(planet -> planet.name),
+                new Column().header("Diameter").footer("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass").footer("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").footer("Atmosphere").with(planet -> planet.atmosphere)));
+
+        String expected = String.join(System.lineSeparator(),
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 1 | Mercury |    0.382 | 0.06 |                         minimal |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "+---+---------+----------+------+---------------------------------+");
+        assertEquals(expected, actualArray);
+        assertEquals(expected, actualObjects);
+    }
+
+    @Test
     public void testTableDefaultNoOutsideBorder() {
         String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER, planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").with(planet -> planet.name),
+                new Column().header("Diameter")
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass")
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "   | Name    | Diameter | Mass | Atmosphere                      ",
@@ -67,18 +134,24 @@ public class AsciiTableTest {
                 "---+---------+----------+------+---------------------------------",
                 " 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon ",
                 "---+---------+----------+------+---------------------------------",
-                " 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon ");
+                " 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon ",
+                "---+---------+----------+------+---------------------------------",
+                "   | Average | 0.716    | 0.50 |                                 ");
         assertEquals(expected, actual);
     }
 
     @Test
     public void testTableDefaultNoDataSeparators() {
         String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_DATA_SEPARATORS, planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").with(planet -> planet.name),
+                new Column().header("Diameter")
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass")
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "+---+---------+----------+------+---------------------------------+",
@@ -88,6 +161,8 @@ public class AsciiTableTest {
                 "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
                 "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
                 "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Average | 0.716    | 0.50 |                                 |",
                 "+---+---------+----------+------+---------------------------------+");
         assertEquals(expected, actual);
     }
@@ -95,11 +170,15 @@ public class AsciiTableTest {
     @Test
     public void testTableDefaultNoDataSeparatorsNoOutsideBorders() {
         String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER, planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").with(planet -> planet.name),
+                new Column().header("Diameter")
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass")
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "   | Name    | Diameter | Mass | Atmosphere                      ",
@@ -107,36 +186,47 @@ public class AsciiTableTest {
                 " 1 | Mercury |    0.382 | 0.06 |                         minimal ",
                 " 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen ",
                 " 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon ",
-                " 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon ");
+                " 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon ",
+                "---+---------+----------+------+---------------------------------",
+                "   | Average | 0.716    | 0.50 |                                 ");
         assertEquals(expected, actual);
     }
 
     @Test
     public void testTableDefaultNoBorders() {
         String actual = AsciiTable.getTable(AsciiTable.NO_BORDERS, planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").with(planet -> planet.name),
+                new Column().header("Diameter")
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass")
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "    Name     Diameter  Mass  Atmosphere                      ",
                 " 1  Mercury     0.382  0.06                          minimal ",
                 " 2    Venus     0.949  0.82         Carbon dioxide, Nitrogen ",
                 " 3    Earth     1.000  1.00          Nitrogen, Oxygen, Argon ",
-                " 4     Mars     0.532  0.11  Carbon dioxide, Nitrogen, Argon ");
+                " 4     Mars     0.532  0.11  Carbon dioxide, Nitrogen, Argon ",
+                "    Average  0.716     0.50                                  ");
         assertEquals(expected, actual);
     }
 
     @Test
     public void testTableDefaultFancyBorders() {
         String actual = AsciiTable.getTable(AsciiTable.FANCY_ASCII, planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").with(planet -> planet.name),
+                new Column().header("Diameter")
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass")
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "╔═══╤═════════╤══════════╤══════╤═════════════════════════════════╗",
@@ -149,18 +239,23 @@ public class AsciiTableTest {
                 "║ 3 │   Earth │    1.000 │ 1.00 │         Nitrogen, Oxygen, Argon ║",
                 "╟───┼─────────┼──────────┼──────┼─────────────────────────────────╢",
                 "║ 4 │    Mars │    0.532 │ 0.11 │ Carbon dioxide, Nitrogen, Argon ║",
+                "╠═══╪═════════╪══════════╪══════╪═════════════════════════════════╣",
+                "║   │ Average │ 0.716    │ 0.50 │                                 ║",
                 "╚═══╧═════════╧══════════╧══════╧═════════════════════════════════╝");
         assertEquals(expected, actual);
     }
 
-    @Test
     public void testTableWithAlignments() {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
-                new Column("Diameter").headerAlign(RIGHT).dataAlign(CENTER).with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").headerAlign(RIGHT).dataAlign(LEFT).with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
+                new Column().header("Diameter").headerAlign(RIGHT).dataAlign(CENTER).footerAlign(CENTER)
+                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass").headerAlign(RIGHT).dataAlign(LEFT)
+                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "+---+---------+----------+------+---------------------------------+",
@@ -173,6 +268,8 @@ public class AsciiTableTest {
                 "| 3 |   Earth |  1.000   | 1.00 |     Nitrogen, Oxygen, Argon     |",
                 "+---+---------+----------+------+---------------------------------+",
                 "| 4 |    Mars |  0.532   | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Average |  0.716   | 0.50 |                                 |",
                 "+---+---------+----------+------+---------------------------------+");
         assertEquals(expected, actual);
     }
@@ -180,11 +277,11 @@ public class AsciiTableTest {
     @Test
     public void testTableWithMaxWidth() {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
-                new Column("").with(planet -> Integer.toString(planet.num)),
-                new Column("Name").with(planet -> planet.name),
-                new Column("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column("Mass").with(planet -> String.format("%.02f", planet.mass)),
-                new Column("Atmosphere").maxColumnWidth(8).with(planet -> planet.atmosphere)));
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").with(planet -> planet.name),
+                new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
+                new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Atmosphere").maxColumnWidth(8).with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
                 "+---+---------+----------+------+--------+",
@@ -230,8 +327,8 @@ public class AsciiTableTest {
         map.put("Nullam ante erat", "In tincidunt pretium dui, ut sagittis sem tincidunt vitae. Nam sed convallis purus, id porttitor arcu.");
 
         String actual = AsciiTable.getTable(map.entrySet(), Arrays.asList(
-                new Column("Key").with(Map.Entry::getKey),
-                new Column("Value").dataAlign(LEFT).maxColumnWidth(30).with(Map.Entry::getValue)));
+                new Column().header("Key").with(Map.Entry::getKey),
+                new Column().header("Value").dataAlign(LEFT).maxColumnWidth(30).with(Map.Entry::getValue)));
 
         String expected = String.join(System.lineSeparator(),
                 "+-----------------------+------------------------------+",
@@ -263,10 +360,26 @@ public class AsciiTableTest {
     }
 
     @Test
+    public void testValidateNullInHeader() {
+        String[] headers = {"Lorem", null, "Dolor"};
+        String[][] data = {{"11", "12", "13"}, {"21", null, "23"}};
+        String actual = AsciiTable.getTable(headers, null, data);
+        String expected = String.join(System.lineSeparator(),
+                "+-------+----+-------+",
+                "| Lorem |    | Dolor |",
+                "+-------+----+-------+",
+                "|    11 | 12 |    13 |",
+                "+-------+----+-------+",
+                "|    21 |    |    23 |",
+                "+-------+----+-------+");
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void testValidateNullInData() {
         String[] headers = {"Lorem", "Ipsum", "Dolor"};
         String[][] data = {{"11", "12", "13"}, {"21", null, "23"}};
-        String actual = AsciiTable.getTable(headers, data);
+        String actual = AsciiTable.getTable(headers, null, data);
         String expected = String.join(System.lineSeparator(),
                 "+-------+-------+-------+",
                 "| Lorem | Ipsum | Dolor |",
@@ -284,7 +397,7 @@ public class AsciiTableTest {
 
         // Multiple different sized data columns, but the widest is as wide as the header
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
-        String actual = AsciiTable.getTable(headers, data);
+        String actual = AsciiTable.getTable(headers, null, data);
         String expected = String.join(System.lineSeparator(),
                 "+-------+-------+-------+-----+",
                 "| Lorem | Ipsum | Dolor | Sit |",
@@ -299,7 +412,7 @@ public class AsciiTableTest {
 
         // The widest data row is now shorter than header
         data = new String[][]{{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33"}};
-        actual = AsciiTable.getTable(headers, data);
+        actual = AsciiTable.getTable(headers, null, data);
         expected = String.join(System.lineSeparator(),
                 "+-------+-------+-------+-----+",
                 "| Lorem | Ipsum | Dolor | Sit |",
@@ -313,18 +426,28 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testValidateTooFewHeaderColumns() {
         String[] headers = {"Lorem", "Ipsum", "Dolor"};
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
-        AsciiTable.getTable(headers, data);
-    }
+        String actual = AsciiTable.getTable(headers, null, data);
+        String expected = String.join(System.lineSeparator(),
+                "+-------+-------+-------+----+",
+                "| Lorem | Ipsum | Dolor |    |",
+                "+-------+-------+-------+----+",
+                "|    11 |    12 |    13 |    |",
+                "+-------+-------+-------+----+",
+                "|    21 |    22 |       |    |",
+                "+-------+-------+-------+----+",
+                "|    31 |    32 |    33 | 34 |",
+                "+-------+-------+-------+----+");
+        assertEquals(expected, actual);    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValidateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
-        AsciiTable.getTable(new Character[10], headers, data);
+        AsciiTable.getTable(new Character[10], headers, null, data);
     }
 
     @Test

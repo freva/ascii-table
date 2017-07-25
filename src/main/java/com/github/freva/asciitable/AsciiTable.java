@@ -4,28 +4,29 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AsciiTable {
     private static final int MIN_PADDING = 1;
 
-    public static final Character[] NO_BORDERS = new Character[22];
+    public static final Character[] NO_BORDERS = new Character[29];
 
     public static final Character[] BASIC_ASCII = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
-            '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+'};
+            '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
     public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
-            '+', '+', '|', '|', '|', null, null, null, null, '+', '-', '+', '+'};
+            '+', '+', '|', '|', '|', null, null, null, null, '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
     public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER = {null, null, null, null, null,
-            '|', null, null, '-', '+', null, null, '|', null, null, null, null, null, null, null, null, null};
+            '|', null, null, '-', '+', null, null, '|', null, null, null, null, null, null, '-', '+', null, null, '|', null, null, null, null, null};
 
     public static final Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
-            null, '-', '+', null, null, '|', null, null, '-', '+', null, null, null, null, null};
+            null, '-', '+', null, null, '|', null, null, '-', '+', null, null, '-', '+', null, null, '|', null, null, null, null, null};
 
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
-            '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╚', '═', '╧', '╝'};
+            '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
 
     public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
@@ -43,13 +44,26 @@ public class AsciiTable {
         return getTable(borderChars, rawColumns, data);
     }
 
-    public static String getTable(String[] header, String[][] data) {
-        return getTable(BASIC_ASCII, header, data);
+    public static String getTable(String[][] data) {
+        return getTable((String[]) null, data);
     }
 
-    public static String getTable(Character[] borderChars, String[] header, String[][] data) {
-        Column[] headerCol = Arrays.stream(header)
-                .map(Column::new)
+    public static String getTable(String[] header, String[][] data) {
+        return getTable(BASIC_ASCII, header, null, data);
+    }
+
+    public static String getTable(String[] header, String[] footer, String[][] data) {
+        return getTable(BASIC_ASCII, header, footer, data);
+    }
+
+    public static String getTable(Character[] borderChars, String[] header, String[] footer, String[][] data) {
+        String[] nonNullHeader = header != null ? header : new String[0];
+        String[] nonNullFooter = footer != null ? footer : new String[0];
+
+        Column[] headerCol = IntStream.range(0, Math.max(nonNullHeader.length, nonNullFooter.length))
+                .mapToObj(index -> new Column()
+                        .header(index < nonNullHeader.length ? nonNullHeader[index] : null)
+                        .footer(index < nonNullFooter.length ? nonNullFooter[index] : null))
                 .toArray(Column[]::new);
 
         return getTable(borderChars, headerCol, data);
@@ -59,40 +73,41 @@ public class AsciiTable {
         return getTable(BASIC_ASCII, columns, data);
     }
 
-    public static String getTable(Character[] borderChars, Column[] columns, String[][] data) {
-        if (borderChars.length != 22) {
-            throw new IllegalArgumentException("Border characters array must be exactly 22 elements long");
+    public static String getTable(Character[] borderChars, Column[] rawColumns, String[][] data) {
+        if (borderChars.length != NO_BORDERS.length) {
+            throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
         }
 
+        final int numColumns = getNumColumns(rawColumns, data);
+        final Column[] columns = IntStream.range(0, numColumns)
+                .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
+                .toArray(Column[]::new);
         final int[] colWidths = getColWidths(columns, data);
-        if (columns.length != colWidths.length) {
-            throw new IllegalArgumentException(String.format("Header/Data column mismatch! There are %d header columns, " +
-                    "but at most %d data columns.", columns.length, colWidths.length));
-        }
 
-        final HorizontalAlign[] headerAligns = Arrays.stream(columns)
-                .map(Column::getHeaderAlign)
-                .toArray(HorizontalAlign[]::new);
-        final HorizontalAlign[] dataAligns = Arrays.stream(columns)
-                .map(Column::getDataAlign)
-                .toArray(HorizontalAlign[]::new);
-        final String[] header = Arrays.stream(columns)
-                .map(Column::getHeader)
-                .toArray(String[]::new);
+        final HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
+        final HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
+        final HorizontalAlign[] footerAligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
 
-        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, borderChars, header, data);
+        final String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
+        final String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
+
+        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, data, footer);
 
         return tableRows.stream()
                 .filter(line -> !line.isEmpty())
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
-    private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns, HorizontalAlign[] dataAligns,
-                                             Character[] borderChars, String[] header, String[][] data) {
+    private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
+                                             HorizontalAlign[] dataAligns, HorizontalAlign[] footerAligns,
+                                             Character[] borderChars, String[] header, String[][] data, String[] footer) {
         final LinkedList<String> lines = new LinkedList<>();
         lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
-        lines.addAll(dataRow(colWidths, headerAligns, header, borderChars[4], borderChars[5], borderChars[6]));
-        lines.add(lineRow(colWidths, borderChars[7], borderChars[8], borderChars[9], borderChars[10]));
+
+        if (! Arrays.stream(header).allMatch(Objects::isNull)) {
+            lines.addAll(dataRow(colWidths, headerAligns, header, borderChars[4], borderChars[5], borderChars[6]));
+            lines.add(lineRow(colWidths, borderChars[7], borderChars[8], borderChars[9], borderChars[10]));
+        }
 
         String contentRowBorder = lineRow(colWidths, borderChars[14], borderChars[15], borderChars[16], borderChars[17]);
         for (String[] dataRow : data) {
@@ -100,7 +115,12 @@ public class AsciiTable {
             lines.add(contentRowBorder);
         }
         if (data.length > 0) lines.removeLast();
-        lines.add(lineRow(colWidths, borderChars[18], borderChars[19], borderChars[20], borderChars[21]));
+        if (! Arrays.stream(footer).allMatch(Objects::isNull)) {
+            lines.add(lineRow(colWidths, borderChars[18], borderChars[19], borderChars[20], borderChars[21]));
+            lines.addAll(dataRow(colWidths, footerAligns, footer, borderChars[22], borderChars[23], borderChars[24]));
+        }
+
+        lines.add(lineRow(colWidths, borderChars[25], borderChars[26], borderChars[27], borderChars[28]));
 
         return lines;
     }
@@ -160,8 +180,7 @@ public class AsciiTable {
      * Returns the width of each column in the resulting table.
      */
     private static int[] getColWidths(Column[] columns, String[][] data) {
-        final int numColumns = getNumColumns(columns, data);
-        final int[] result = new int[numColumns];
+        final int[] result = new int[columns.length];
 
         for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
@@ -170,8 +189,8 @@ public class AsciiTable {
         }
 
         for (int col = 0; col < columns.length; col++) {
-            int length = Math.max(result[col], columns[col].getHeader().length()) + 2 * MIN_PADDING;
-            result[col] = Math.min(columns[col].getMaxColumnWidth(), length);
+            int length = Math.max(Math.max(columns[col].getHeaderWidth(), columns[col].getFooterWidth()), result[col]);
+            result[col] = Math.min(columns[col].getMaxColumnWidth(), length + 2 * MIN_PADDING);
         }
         return result;
     }
