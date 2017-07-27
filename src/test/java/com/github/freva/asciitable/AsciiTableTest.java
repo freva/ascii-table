@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static com.github.freva.asciitable.HorizontalAlign.*;
@@ -28,8 +29,8 @@ public class AsciiTableTest {
         String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().with(planet -> planet.name),
-                new Column().with(planet -> String.format("%.03f", planet.diameter)),
-                new Column().with(planet -> String.format("%.02f", planet.mass)),
+                new Column().with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                new Column().with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -58,8 +59,8 @@ public class AsciiTableTest {
         String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").with(planet -> planet.name),
-                new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Diameter").with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                new Column().header("Mass").with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -90,8 +91,8 @@ public class AsciiTableTest {
         String actualObjects = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Name").with(planet -> planet.name),
-                new Column().header("Diameter").footer("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column().header("Mass").footer("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Diameter").footer("Diameter").with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                new Column().header("Mass").footer("Mass").with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").footer("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -118,11 +119,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
                 new Column().header("Diameter")
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass")
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -146,11 +147,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
                 new Column().header("Diameter")
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass")
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -173,11 +174,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
                 new Column().header("Diameter")
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass")
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -198,11 +199,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
                 new Column().header("Diameter")
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass")
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -221,11 +222,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
                 new Column().header("Diameter")
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass")
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -250,11 +251,11 @@ public class AsciiTableTest {
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
                 new Column().header("Diameter").headerAlign(RIGHT).dataAlign(CENTER).footerAlign(CENTER)
-                        .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                        .with(planet -> String.format("%.03f", planet.diameter)),
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass").headerAlign(RIGHT).dataAlign(LEFT)
-                        .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                        .with(planet -> String.format("%.02f", planet.mass)),
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
@@ -279,8 +280,8 @@ public class AsciiTableTest {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").with(planet -> planet.name),
-                new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
-                new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
+                new Column().header("Diameter").with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                new Column().header("Mass").with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                 new Column().header("Atmosphere").maxColumnWidth(8).with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
