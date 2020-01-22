@@ -7,7 +7,7 @@ Easily create and customize simple ASCII tables in Java. Based off
 Maven:
 ```
 <dependency>
-  <groupId>com.github,freva</groupId>
+  <groupId>com.github.freva</groupId>
   <artifactId>ascii-table</artifactId>
   <version>1.1.0</version>
 </dependency>
