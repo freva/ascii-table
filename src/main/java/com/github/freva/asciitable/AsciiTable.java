@@ -1,10 +1,6 @@
 package com.github.freva.asciitable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +24,8 @@ public class AsciiTable {
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
+    private static final String ANSI_REGEX = "\\x1b\\[[0-9;]*m";
+
 
     public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
         return getTable(BASIC_ASCII, objects, columns);
@@ -35,7 +33,7 @@ public class AsciiTable {
 
     public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns) {
         Column[] rawColumns = columns.toArray(new Column[columns.size()]);
-        Object[][] data = objects.stream()
+        String[][] data = objects.stream()
                 .map(object ->  columns.stream()
                         .map(dataColumn ->  dataColumn.getCellValue(object))
                         .toArray(String[]::new))
@@ -78,11 +76,18 @@ public class AsciiTable {
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
         }
 
-        final int numColumns = getNumColumns(rawColumns, data);
+        String[][] stringData = new String[data.length][];
+        for(int i = 0; i < stringData.length; i++) {
+            stringData[i] = new String[data[i].length];
+            for(int o = 0; o < data[i].length; o++) {
+                stringData[i][o] = data[i][o] == null ? "" : data[i][o].toString();
+            }
+        }
+        final int numColumns = getNumColumns(rawColumns, stringData);
         final Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
                 .toArray(Column[]::new);
-        final int[] colWidths = getColWidths(columns, data);
+        final int[] colWidths = getColWidths(columns, stringData);
 
         final HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
         final HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
@@ -91,7 +96,7 @@ public class AsciiTable {
         final String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
         final String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
 
-        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, data, footer);
+        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, stringData, footer);
 
         return tableRows.stream()
                 .filter(line -> !line.isEmpty())
@@ -100,7 +105,7 @@ public class AsciiTable {
 
     private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
                                              HorizontalAlign[] dataAligns, HorizontalAlign[] footerAligns,
-                                             Character[] borderChars, String[] header, Object[][] data, String[] footer) {
+                                             Character[] borderChars, String[] header, String[][] data, String[] footer) {
         final LinkedList<String> lines = new LinkedList<>();
         lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
 
@@ -179,12 +184,12 @@ public class AsciiTable {
     /**
      * Returns the width of each column in the resulting table.
      */
-    private static int[] getColWidths(Column[] columns, Object[][] data) {
+    private static int[] getColWidths(Column[] columns, String[][] data) {
         final int[] result = new int[columns.length];
 
-        for (Object[] dataRow : data) {
+        for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].toString().length());
+                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].replaceAll(ANSI_REGEX, "").length()); // replaces not visible ansi formatting chars
             }
         }
 
@@ -198,7 +203,7 @@ public class AsciiTable {
     /**
      * Returns maximum number of columns between the header or any of the data rows.
      */
-    private static int getNumColumns(Column[] columns, Object[][] data) {
+    private static int getNumColumns(Column[] columns, String[][] data) {
         final int maxDataColumns = Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
                 .max().orElse(0);
@@ -224,6 +229,10 @@ public class AsciiTable {
      * @return List of string that form original string, but each string is as-short-or-shorter than maxCharInLine
      */
     static List<String> splitTextIntoLinesOfMaxLength(String str, int maxCharInLine) {
+        if(str.replaceAll(ANSI_REGEX, "").length() != str.length()){
+            // color codes here. We can not split this yet, would result in a mess!
+            return new LinkedList<>(Collections.singletonList(str));
+        }
         final List<String> lines = new LinkedList<>();
         final StringBuilder line = new StringBuilder(maxCharInLine);
         int offset = 0;
@@ -232,10 +241,10 @@ public class AsciiTable {
             final int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
 
             if (offset < spaceToWrapAt) {
-                line.append(str.substring(offset, spaceToWrapAt));
+                line.append(str, offset, spaceToWrapAt);
                 offset = spaceToWrapAt + 1;
             } else {
-                line.append(str.substring(offset, offset + maxCharInLine));
+                line.append(str, offset, offset + maxCharInLine);
                 offset += maxCharInLine;
             }
 
@@ -261,6 +270,11 @@ public class AsciiTable {
      * @return Justified string's char array
      */
     static char[] justify(String str, HorizontalAlign align, int length, int minPadding) {
+        int withoutANSILength = str.replaceAll(ANSI_REGEX, "").length();
+        if (withoutANSILength != str.length()) {
+            // this string contains ANSI chars, we need to adjust the length to it
+            length += str.length() - withoutANSILength;
+        }
         if (str.length() < length) {
             final char[] justified = new char[length];
             Arrays.fill(justified, ' ');
