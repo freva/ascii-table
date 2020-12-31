@@ -35,7 +35,7 @@ public class AsciiTable {
 
     public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns) {
         Column[] rawColumns = columns.toArray(new Column[columns.size()]);
-        String[][] data = objects.stream()
+        Object[][] data = objects.stream()
                 .map(object ->  columns.stream()
                         .map(dataColumn ->  dataColumn.getCellValue(object))
                         .toArray(String[]::new))
@@ -44,19 +44,19 @@ public class AsciiTable {
         return getTable(borderChars, rawColumns, data);
     }
 
-    public static String getTable(String[][] data) {
+    public static String getTable(Object[][] data) {
         return getTable((String[]) null, data);
     }
 
-    public static String getTable(String[] header, String[][] data) {
+    public static String getTable(String[] header, Object[][] data) {
         return getTable(BASIC_ASCII, header, null, data);
     }
 
-    public static String getTable(String[] header, String[] footer, String[][] data) {
+    public static String getTable(String[] header, String[] footer, Object[][] data) {
         return getTable(BASIC_ASCII, header, footer, data);
     }
 
-    public static String getTable(Character[] borderChars, String[] header, String[] footer, String[][] data) {
+    public static String getTable(Character[] borderChars, String[] header, String[] footer, Object[][] data) {
         String[] nonNullHeader = header != null ? header : new String[0];
         String[] nonNullFooter = footer != null ? footer : new String[0];
 
@@ -69,11 +69,11 @@ public class AsciiTable {
         return getTable(borderChars, headerCol, data);
     }
 
-    public static String getTable(Column[] columns, String[][] data) {
+    public static String getTable(Column[] columns, Object[][] data) {
         return getTable(BASIC_ASCII, columns, data);
     }
 
-    public static String getTable(Character[] borderChars, Column[] rawColumns, String[][] data) {
+    public static String getTable(Character[] borderChars, Column[] rawColumns, Object[][] data) {
         if (borderChars.length != NO_BORDERS.length) {
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
         }
@@ -100,7 +100,7 @@ public class AsciiTable {
 
     private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
                                              HorizontalAlign[] dataAligns, HorizontalAlign[] footerAligns,
-                                             Character[] borderChars, String[] header, String[][] data, String[] footer) {
+                                             Character[] borderChars, String[] header, Object[][] data, String[] footer) {
         final LinkedList<String> lines = new LinkedList<>();
         lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
 
@@ -110,7 +110,7 @@ public class AsciiTable {
         }
 
         String contentRowBorder = lineRow(colWidths, borderChars[14], borderChars[15], borderChars[16], borderChars[17]);
-        for (String[] dataRow : data) {
+        for (Object[] dataRow : data) {
             lines.addAll(dataRow(colWidths, dataAligns, dataRow, borderChars[11], borderChars[12], borderChars[13]));
             lines.add(contentRowBorder);
         }
@@ -145,11 +145,11 @@ public class AsciiTable {
      *  - Contents of a row exceed maxCharInLine for that row
      *  - Contents of a row we're already multiline
      */
-    private static List<String> dataRow(int[] colWidths, HorizontalAlign[] horizontalAligns, String[] contents,
+    private static List<String> dataRow(int[] colWidths, HorizontalAlign[] horizontalAligns, Object[] contents,
                                  Character left, Character columnSeparator, Character right) {
         final List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
-                    String text = i < contents.length && contents[i] != null ? contents[i] : "";
+                    String text = i < contents.length && contents[i] != null ? contents[i].toString() : "";
                     String[] paragraphs = text.split(System.lineSeparator());
                     return Arrays.stream(paragraphs)
                             .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* MIN_PADDING).stream())
@@ -179,12 +179,12 @@ public class AsciiTable {
     /**
      * Returns the width of each column in the resulting table.
      */
-    private static int[] getColWidths(Column[] columns, String[][] data) {
+    private static int[] getColWidths(Column[] columns, Object[][] data) {
         final int[] result = new int[columns.length];
 
-        for (String[] dataRow : data) {
+        for (Object[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].length());
+                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].toString().length());
             }
         }
 
@@ -198,7 +198,7 @@ public class AsciiTable {
     /**
      * Returns maximum number of columns between the header or any of the data rows.
      */
-    private static int getNumColumns(Column[] columns, String[][] data) {
+    private static int getNumColumns(Column[] columns, Object[][] data) {
         final int maxDataColumns = Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
                 .max().orElse(0);
