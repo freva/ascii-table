@@ -470,19 +470,25 @@ public class AsciiTableTest {
         String[] expected = {string + "          ", "     " + string + "     ", "          " + string};
         String[] expectedWithPadding = {"   " + string + "       ", "     " + string + "     ", "       " + string + "   "};
         for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], new String(AsciiTable.justify(string, values()[i], 14, 0)));
-            assertEquals(expectedWithPadding[i], new String(AsciiTable.justify(string, values()[i], 14, 3)));
+            assertJustify(expected[i], string, values()[i], 14, 0);
+            assertJustify(expectedWithPadding[i], string, values()[i], 14, 3);
         }
 
         String expectedOddLengthCenter = "  " + string + "   ";
-        assertEquals(expectedOddLengthCenter, new String(AsciiTable.justify(string, CENTER, 9, 0)));
+        assertJustify(expectedOddLengthCenter, string, CENTER, 9, 0);
 
         // Justifying to same length or less is a no-op
-        assertEquals(string, new String(AsciiTable.justify(string, CENTER, string.length(), 0)));
-        assertEquals(string, new String(AsciiTable.justify(string, CENTER, string.length() - 1, 0)));
+        assertJustify(string, string, CENTER, string.length(), 0);
+        assertJustify(string, string, CENTER, string.length() - 1, 0);
 
         // Since padding is included in length, justifying to same length with padding should be no-op
-        assertEquals(string, new String(AsciiTable.justify(string, CENTER, string.length(), 3)));
+        assertJustify(string, string, CENTER, string.length(), 3);
+    }
+
+    private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) {
+        StringBuilder sb = new StringBuilder();
+        AsciiTable.appendJustified(sb, str, align, length, minPadding);
+        assertEquals(expected, sb.toString());
     }
 
     private static class Planet {

@@ -1,5 +1,6 @@
 package com.github.freva.asciitable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -131,7 +132,7 @@ public class AsciiTable {
         StringBuilder row = new StringBuilder(getTableWidth(colWidths));
         if (left != null) row.append((char) left);
         for (int col = 0; col < colWidths.length; col++) {
-            if (middle != null) row.append(repeat(middle, colWidths[col]));
+            if (middle != null) appendRepeat(row, middle, colWidths[col]);
             if (columnSeparator != null && col != colWidths.length - 1) row.append((char) columnSeparator);
         }
         if (right != null) row.append((char) right);
@@ -160,12 +161,12 @@ public class AsciiTable {
                 .max().orElse(0);
 
         StringBuilder row = new StringBuilder(getTableWidth(colWidths));
-        List<String> lines = new LinkedList<>();
+        List<String> lines = new ArrayList<>(numLines);
         for (int line = 0; line < numLines; line++) {
             if (left != null) row.append((char) left);
             for (int col = 0; col < colWidths.length; col++) {
                 String item = linesContents.get(col).size() <= line ? "" : linesContents.get(col).get(line);
-                row.append(justify(item, horizontalAligns[col], colWidths[col], MIN_PADDING));
+                appendJustified(row, item, horizontalAligns[col], colWidths[col], MIN_PADDING);
                 if (columnSeparator != null && col != colWidths.length - 1) row.append((char) columnSeparator);
             }
             if (right != null) row.append((char) right);
@@ -223,10 +224,10 @@ public class AsciiTable {
             int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
 
             if (offset < spaceToWrapAt) {
-                line.append(str.substring(offset, spaceToWrapAt));
+                line.append(str, offset, spaceToWrapAt);
                 offset = spaceToWrapAt + 1;
             } else {
-                line.append(str.substring(offset, offset + maxCharInLine));
+                line.append(str, offset, offset + maxCharInLine);
                 offset += maxCharInLine;
             }
 
@@ -249,34 +250,20 @@ public class AsciiTable {
      * @param align Horizontal alignment
      * @param length Total new length
      * @param minPadding Length of padding to apply from both left and right before justifying
-     * @return Justified string's char array
      */
-    static char[] justify(String str, HorizontalAlign align, int length, int minPadding) {
+    static void appendJustified(StringBuilder sb, String str, HorizontalAlign align, int length, int minPadding) {
         if (str.length() < length) {
-            char[] justified = new char[length];
-            Arrays.fill(justified, ' ');
-            switch (align) {
-                case LEFT:
-                    System.arraycopy(str.toCharArray(), 0, justified, minPadding, str.length());
-                    break;
+            int leftPadding = align == HorizontalAlign.LEFT ?   minPadding :
+                              align == HorizontalAlign.CENTER ? (length - str.length()) / 2 :
+                                                                length - str.length() - minPadding;
 
-                case CENTER:
-                    System.arraycopy(str.toCharArray(), 0, justified, (length - str.length()) / 2, str.length());
-                    break;
-
-                case RIGHT:
-                    System.arraycopy(str.toCharArray(), 0, justified, length - str.length() - minPadding, str.length());
-                    break;
-            }
-
-            return justified;
-        }
-        return str.toCharArray();
+            appendRepeat(sb, ' ', leftPadding);
+            sb.append(str);
+            appendRepeat(sb, ' ', length - str.length() - leftPadding);
+        } else sb.append(str);
     }
 
-    private static char[] repeat(char c, int num) {
-        char[] repeat = new char[num];
-        Arrays.fill(repeat, c);
-        return repeat;
+    private static void appendRepeat(StringBuilder sb, char c, int num) {
+        for (int i = 0; i < num; i++) sb.append(c);
     }
 }
