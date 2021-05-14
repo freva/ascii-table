@@ -74,22 +74,21 @@ public class AsciiTable {
     }
 
     public static String getTable(Character[] borderChars, Column[] rawColumns, String[][] data) {
-        if (borderChars.length != NO_BORDERS.length) {
+        if (borderChars.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
-        }
 
-        final int numColumns = getNumColumns(rawColumns, data);
-        final Column[] columns = IntStream.range(0, numColumns)
+        int numColumns = getNumColumns(rawColumns, data);
+        Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
                 .toArray(Column[]::new);
-        final int[] colWidths = getColWidths(columns, data);
+        int[] colWidths = getColWidths(columns, data);
 
-        final HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
-        final HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
-        final HorizontalAlign[] footerAligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
+        HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
+        HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
+        HorizontalAlign[] footerAligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
 
-        final String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
-        final String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
+        String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
+        String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
 
         List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, data, footer);
 
@@ -101,7 +100,7 @@ public class AsciiTable {
     private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
                                              HorizontalAlign[] dataAligns, HorizontalAlign[] footerAligns,
                                              Character[] borderChars, String[] header, String[][] data, String[] footer) {
-        final LinkedList<String> lines = new LinkedList<>();
+        LinkedList<String> lines = new LinkedList<>();
         lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
 
         if (! Arrays.stream(header).allMatch(Objects::isNull)) {
@@ -129,7 +128,7 @@ public class AsciiTable {
      * Returns a line/border row in the resulting table
      */
     private static String lineRow(int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) {
-        final StringBuilder row = new StringBuilder(getTableWidth(colWidths));
+        StringBuilder row = new StringBuilder(getTableWidth(colWidths));
         if (left != null) row.append((char) left);
         for (int col = 0; col < colWidths.length; col++) {
             if (middle != null) row.append(repeat(middle, colWidths[col]));
@@ -147,7 +146,7 @@ public class AsciiTable {
      */
     private static List<String> dataRow(int[] colWidths, HorizontalAlign[] horizontalAligns, String[] contents,
                                  Character left, Character columnSeparator, Character right) {
-        final List<List<String>> linesContents = IntStream.range(0, colWidths.length)
+        List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
                     String[] paragraphs = text.split(System.lineSeparator());
@@ -156,12 +155,12 @@ public class AsciiTable {
                             .collect(Collectors.toList());
                 })
                 .collect(Collectors.toList());
-        final int numLines = linesContents.stream()
+        int numLines = linesContents.stream()
                 .mapToInt(List::size)
                 .max().orElse(0);
 
-        final StringBuilder row = new StringBuilder(getTableWidth(colWidths));
-        final List<String> lines = new LinkedList<>();
+        StringBuilder row = new StringBuilder(getTableWidth(colWidths));
+        List<String> lines = new LinkedList<>();
         for (int line = 0; line < numLines; line++) {
             if (left != null) row.append((char) left);
             for (int col = 0; col < colWidths.length; col++) {
@@ -176,11 +175,9 @@ public class AsciiTable {
         return lines;
     }
 
-    /**
-     * Returns the width of each column in the resulting table.
-     */
+    /** Returns the width of each column in the resulting table */
     private static int[] getColWidths(Column[] columns, String[][] data) {
-        final int[] result = new int[columns.length];
+        int[] result = new int[columns.length];
 
         for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
@@ -195,20 +192,14 @@ public class AsciiTable {
         return result;
     }
 
-    /**
-     * Returns maximum number of columns between the header or any of the data rows.
-     */
+    /** Returns maximum number of columns between the header or any of the data rows */
     private static int getNumColumns(Column[] columns, String[][] data) {
-        final int maxDataColumns = Arrays.stream(data)
+        return Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
-                .max().orElse(0);
-
-        return Math.max(columns.length, maxDataColumns);
+                .reduce(columns.length, Math::max);
     }
 
-    /**
-     * Returns the width of each line in resulting table not counting the line break character(s).
-     */
+    /** Returns the width of each line in resulting table not counting the line break character(s) */
     private static int getTableWidth(int[] colWidths) {
         return Arrays.stream(colWidths).sum() + MIN_PADDING * (colWidths.length + 1) - 1;
     }
@@ -224,12 +215,12 @@ public class AsciiTable {
      * @return List of string that form original string, but each string is as-short-or-shorter than maxCharInLine
      */
     static List<String> splitTextIntoLinesOfMaxLength(String str, int maxCharInLine) {
-        final List<String> lines = new LinkedList<>();
-        final StringBuilder line = new StringBuilder(maxCharInLine);
+        List<String> lines = new LinkedList<>();
+        StringBuilder line = new StringBuilder(maxCharInLine);
         int offset = 0;
 
         while (offset < str.length() && maxCharInLine < str.length() - offset) {
-            final int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
+            int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
 
             if (offset < spaceToWrapAt) {
                 line.append(str.substring(offset, spaceToWrapAt));
@@ -262,7 +253,7 @@ public class AsciiTable {
      */
     static char[] justify(String str, HorizontalAlign align, int length, int minPadding) {
         if (str.length() < length) {
-            final char[] justified = new char[length];
+            char[] justified = new char[length];
             Arrays.fill(justified, ' ');
             switch (align) {
                 case LEFT:

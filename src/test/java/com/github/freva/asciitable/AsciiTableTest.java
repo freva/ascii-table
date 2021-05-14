@@ -246,6 +246,7 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
+    @Test
     public void testTableWithAlignments() {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
@@ -485,11 +486,11 @@ public class AsciiTableTest {
     }
 
     private static class Planet {
-        final int num;
-        final String name;
-        final double diameter;
-        final double mass;
-        final String atmosphere;
+        private final int num;
+        private final String name;
+        private final double diameter;
+        private final double mass;
+        private final String atmosphere;
         
         private Planet(int num, String name, double diameter, double mass, String atmosphere) {
             this.num = num;
