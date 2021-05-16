@@ -2,6 +2,7 @@ package com.github.freva.asciitable;
 
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -443,7 +444,19 @@ public class AsciiTableTest {
                 "+-------+-------+-------+----+",
                 "|    31 |    32 |    33 | 34 |",
                 "+-------+-------+-------+----+");
-        assertEquals(expected, actual);    }
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testObjectDataArray() {
+        Object[][] data = {{"String", 123, Instant.ofEpochSecond(1621152246)}};
+        String actual = AsciiTable.getTable(data);
+        String expected = String.join(System.lineSeparator(),
+                "+--------+-----+----------------------+",
+                "| String | 123 | 2021-05-16T08:04:06Z |",
+                "+--------+-----+----------------------+");
+        assertEquals(expected, actual);
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testValidateTooFewBorderChars() {

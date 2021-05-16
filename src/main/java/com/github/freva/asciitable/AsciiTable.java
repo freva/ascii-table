@@ -45,19 +45,19 @@ public class AsciiTable {
         return getTable(borderChars, rawColumns, data);
     }
 
-    public static String getTable(String[][] data) {
+    public static String getTable(Object[][] data) {
         return getTable((String[]) null, data);
     }
 
-    public static String getTable(String[] header, String[][] data) {
+    public static String getTable(String[] header, Object[][] data) {
         return getTable(BASIC_ASCII, header, null, data);
     }
 
-    public static String getTable(String[] header, String[] footer, String[][] data) {
+    public static String getTable(String[] header, String[] footer, Object[][] data) {
         return getTable(BASIC_ASCII, header, footer, data);
     }
 
-    public static String getTable(Character[] borderChars, String[] header, String[] footer, String[][] data) {
+    public static String getTable(Character[] borderChars, String[] header, String[] footer, Object[][] data) {
         String[] nonNullHeader = header != null ? header : new String[0];
         String[] nonNullFooter = footer != null ? footer : new String[0];
 
@@ -70,19 +70,20 @@ public class AsciiTable {
         return getTable(borderChars, headerCol, data);
     }
 
-    public static String getTable(Column[] columns, String[][] data) {
+    public static String getTable(Column[] columns, Object[][] data) {
         return getTable(BASIC_ASCII, columns, data);
     }
 
-    public static String getTable(Character[] borderChars, Column[] rawColumns, String[][] data) {
+    public static String getTable(Character[] borderChars, Column[] rawColumns, Object[][] data) {
         if (borderChars.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
-        int numColumns = getNumColumns(rawColumns, data);
+        String[][] stringData = objectArrayToString(data);
+        int numColumns = getNumColumns(rawColumns, stringData);
         Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
                 .toArray(Column[]::new);
-        int[] colWidths = getColWidths(columns, data);
+        int[] colWidths = getColWidths(columns, stringData);
 
         HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
         HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
@@ -91,7 +92,7 @@ public class AsciiTable {
         String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
         String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
 
-        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, data, footer);
+        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, stringData, footer);
 
         return tableRows.stream()
                 .filter(line -> !line.isEmpty())
@@ -265,5 +266,17 @@ public class AsciiTable {
 
     private static void appendRepeat(StringBuilder sb, char c, int num) {
         for (int i = 0; i < num; i++) sb.append(c);
+    }
+
+    private static String[][] objectArrayToString(Object[][] array) {
+        if (array instanceof String[][]) return (String[][]) array;
+        String[][] stringArray = new String[array.length][];
+        for (int i = 0; i < stringArray.length; i++) {
+            stringArray[i] = new String[array[i].length];
+            for (int j = 0; j < array[i].length; j++) {
+                stringArray[i][j] = array[i][j] == null ? null : array[i][j].toString();
+            }
+        }
+        return stringArray;
     }
 }
