@@ -458,6 +458,18 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void calculatesCorrectColumnWidthWithLineBreak() {
+        String[][] data = {{"String", "First line\nSecond line"}};
+        String actual = AsciiTable.getTable(data);
+        String expected = String.join(System.lineSeparator(),
+                "+--------+-------------+\n" +
+                "| String |  First line |",
+                "|        | Second line |",
+                "+--------+-------------+");
+        assertEquals(expected, actual);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testValidateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};

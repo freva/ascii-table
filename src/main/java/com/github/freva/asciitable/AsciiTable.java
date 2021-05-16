@@ -182,7 +182,7 @@ public class AsciiTable {
 
         for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : dataRow[col].length());
+                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : LineUtils.maxLineLength(dataRow[col]));
             }
         }
 

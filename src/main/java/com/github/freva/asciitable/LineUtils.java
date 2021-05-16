@@ -14,6 +14,16 @@ public class LineUtils {
                 false);
     }
 
+    public static int maxLineLength(String str) {
+        int max = 0;
+        LineIterator lineIterator = new LineIterator(str);
+        while (lineIterator.hasNext()) {
+            int start = lineIterator.getPosition();
+            max = Math.max(max, lineIterator.getLineEndPositionAndAdvanceToNextLine() - start);
+        }
+        return max;
+    }
+
     private static class LineIterator implements Iterator<String> {
         private final String str;
         private int position = 0;
