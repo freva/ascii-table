@@ -319,11 +319,11 @@ public class AsciiTableTest {
     @Test
     public void testTableWithParagraphs() {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("Ut sagittis facilisis", String.join(System.lineSeparator(),
+        map.put("Ut sagittis facilisis", String.join("\r\n",
                 "Duis nec urna magna. Pellentesque accumsan metus vel metus convallis, a tempus enim pretium.",
                 "Integer hendrerit enim tellus, et fermentum diam sollicitudin eleifend.",
                 "Cras condimentum magna non leo mattis posuere."));
-        map.put("Nulla ac scelerisque", String.join(System.lineSeparator(),
+        map.put("Nulla ac scelerisque", String.join("\n",
                 "Nullam vitae nisl vel turpis commodo ultrices.",
                 "Fusce hendrerit lobortis nibh a finibus.",
                 "In faucibus arcu at odio commodo facilisis."));

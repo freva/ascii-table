@@ -151,8 +151,7 @@ public class AsciiTable {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
-                    String[] paragraphs = text.split(System.lineSeparator());
-                    return Arrays.stream(paragraphs)
+                    return LineUtils.lines(text)
                             .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* MIN_PADDING).stream())
                             .collect(Collectors.toList());
                 })
