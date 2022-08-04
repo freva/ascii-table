@@ -14,7 +14,7 @@ Maven:
 ```
 Gradle:
 ```
-compile 'com.github.freva:ascii-table:1.1.0'
+compile 'com.github.freva:ascii-table:1.2.0'
 ```
 
 ## Basic case
