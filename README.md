@@ -9,12 +9,12 @@ Maven:
 <dependency>
   <groupId>com.github.freva</groupId>
   <artifactId>ascii-table</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 Gradle:
 ```
-compile 'com.github.freva:ascii-table:1.1.0'
+compile 'com.github.freva:ascii-table:1.3.0'
 ```
 
 ## Basic case
