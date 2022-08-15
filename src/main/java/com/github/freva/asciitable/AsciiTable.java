@@ -9,7 +9,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class AsciiTable {
+public class AsciiTable
+{
     private static final int MIN_PADDING = 1;
 
     public static final Character[] NO_BORDERS = new Character[29];
@@ -26,38 +27,53 @@ public class AsciiTable {
     public static final Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
             null, '-', '+', null, null, '|', null, null, '-', '+', null, null, '-', '+', null, null, '|', null, null, null, null, null};
 
-    public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
+    public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║', '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
 
-    public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
+    public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns)
+    {
         return getTable(BASIC_ASCII, objects, columns);
     }
 
-    public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns) {
+    public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns)
+    {
         Column[] rawColumns = columns.toArray(new Column[columns.size()]);
-        String[][] data = objects.stream()
-                .map(object ->  columns.stream()
-                        .map(dataColumn ->  dataColumn.getCellValue(object))
-                        .toArray(String[]::new))
-                .toArray(String[][]::new);
-
-        return getTable(borderChars, rawColumns, data);
+        return getTable(borderChars, rawColumns, objectCollectionToObjectArray(objects, columns));
     }
 
-    public static String getTable(Object[][] data) {
+    public static <T> List<String> getTableRows(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns)
+    {
+        Column[] rawColumns = columns.toArray(new Column[columns.size()]);
+        return getTableRows(borderChars, rawColumns, objectCollectionToObjectArray(objects, columns));
+    }
+
+    private static <T> String[][] objectCollectionToObjectArray(Collection<T> objects, List<ColumnData<T>> columns)
+    {
+        return objects.stream()
+                .map(object -> columns.stream()
+                        .map(dataColumn -> dataColumn.getCellValue(object))
+                        .toArray(String[]::new))
+                .toArray(String[][]::new);
+    }
+
+    public static String getTable(Object[][] data)
+    {
         return getTable((String[]) null, data);
     }
 
-    public static String getTable(String[] header, Object[][] data) {
+    public static String getTable(String[] header, Object[][] data)
+    {
         return getTable(BASIC_ASCII, header, null, data);
     }
 
-    public static String getTable(String[] header, String[] footer, Object[][] data) {
+    public static String getTable(String[] header, String[] footer, Object[][] data)
+    {
         return getTable(BASIC_ASCII, header, footer, data);
     }
 
-    public static String getTable(Character[] borderChars, String[] header, String[] footer, Object[][] data) {
+    public static String getTable(Character[] borderChars, String[] header, String[] footer, Object[][] data)
+    {
         String[] nonNullHeader = header != null ? header : new String[0];
         String[] nonNullFooter = footer != null ? footer : new String[0];
 
@@ -70,11 +86,21 @@ public class AsciiTable {
         return getTable(borderChars, headerCol, data);
     }
 
-    public static String getTable(Column[] columns, Object[][] data) {
+    public static String getTable(Column[] columns, Object[][] data)
+    {
         return getTable(BASIC_ASCII, columns, data);
     }
 
-    public static String getTable(Character[] borderChars, Column[] rawColumns, Object[][] data) {
+    public static String getTable(Character[] borderChars, Column[] rawColumns, Object[][] data)
+    {
+        List<String> tableRows = getTableRows(borderChars, rawColumns, data);
+        return tableRows.stream()
+                .filter(line -> !line.isEmpty())
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    public static List<String> getTableRows(Character[] borderChars, Column[] rawColumns, Object[][] data)
+    {
         if (borderChars.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
@@ -92,11 +118,7 @@ public class AsciiTable {
         String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
         String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
 
-        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, stringData, footer);
-
-        return tableRows.stream()
-                .filter(line -> !line.isEmpty())
-                .collect(Collectors.joining(System.lineSeparator()));
+        return getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, stringData, footer);
     }
 
     private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
