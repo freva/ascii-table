@@ -510,6 +510,38 @@ public class AsciiTableTest {
         assertJustify(string, string, CENTER, string.length(), 3);
     }
 
+    @Test
+    public void testTableRows() {
+        String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
+        String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
+                {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
+                {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
+                {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
+
+        String actualArray = AsciiTable.getTable(headers, null, data);
+        List<String> actualObjects = AsciiTable.getTableRows(AsciiTable.BASIC_ASCII, planets, Arrays.asList(
+                new Column().with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").with(planet -> planet.name),
+                new Column().header("Diameter").with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                new Column().header("Mass").with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
+                new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
+
+        String expected = String.join(System.lineSeparator(),
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 1 | Mercury |    0.382 | 0.06 |                         minimal |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+");
+        assertEquals(expected, actualArray);
+        assertEquals(expected, String.join(System.lineSeparator(), actualObjects));
+    }
+
     private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) {
         StringBuilder sb = new StringBuilder();
         AsciiTable.appendJustified(sb, str, align, length, minPadding);
