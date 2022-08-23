@@ -5,31 +5,31 @@ import java.util.function.Function;
 public class Column {
     private String header;
     private String footer;
-    private HorizontalAlign headerAlign = HorizontalAlign.LEFT;
-    private HorizontalAlign dataAlign = HorizontalAlign.RIGHT;
-    private HorizontalAlign footerAlign = HorizontalAlign.LEFT;
-    private int maxWidth = 80;
+    private HorizontalAlign headerAlign;
+    private HorizontalAlign dataAlign;
+    private HorizontalAlign footerAlign;
+    private int minWidth;
+    private int maxWidth;
 
-    public Column() { }
+    public Column() {
+        this(null, null, HorizontalAlign.LEFT, HorizontalAlign.RIGHT, HorizontalAlign.LEFT, 0, 80);
+    }
 
     @Deprecated
     public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
                   HorizontalAlign footerAlign, int maxWidth) {
+        this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth);
+    }
+
+    public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
+                  HorizontalAlign footerAlign, int minWidth, int maxWidth) {
         this.header = header;
         this.footer = footer;
         this.headerAlign = headerAlign;
         this.dataAlign = dataAlign;
         this.footerAlign = footerAlign;
+        this.minWidth = minWidth;
         this.maxWidth = maxWidth;
-    }
-
-    Column(Column column) {
-        this.header = column.getHeader();
-        this.footer = column.getFooter();
-        this.headerAlign = column.getHeaderAlign();
-        this.dataAlign = column.getDataAlign();
-        this.footerAlign = column.getFooterAlign();
-        this.maxWidth = column.getMaxWidth();
     }
 
     public String getHeader() {
@@ -50,6 +50,10 @@ public class Column {
 
     public HorizontalAlign getFooterAlign() {
         return footerAlign;
+    }
+
+    public int getMinWidth() {
+        return minWidth;
     }
 
     public int getMaxWidth() {
@@ -96,6 +100,12 @@ public class Column {
     /** Sets horizontal alignment of the footer cells for this column */
     public Column footerAlign(HorizontalAlign footerAlign) {
         this.footerAlign = footerAlign;
+        return this;
+    }
+
+    /** Min width of this column */
+    public Column minWidth(int minWidth) {
+        this.minWidth = minWidth;
         return this;
     }
 

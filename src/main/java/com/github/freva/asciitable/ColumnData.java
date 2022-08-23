@@ -6,7 +6,8 @@ public class ColumnData<T> extends Column {
     private final Function<T, String> getter;
 
     ColumnData(Column column, Function<T, String> getter) {
-        super(column);
+        super(column.getHeader(), column.getFooter(), column.getHeaderAlign(), column.getDataAlign(), column.getFooterAlign(),
+                column.getMinWidth(), column.getMaxWidth());
         this.getter = getter;
     }
 

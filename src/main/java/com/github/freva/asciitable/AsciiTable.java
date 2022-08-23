@@ -186,7 +186,7 @@ public class AsciiTable {
 
         for (int col = 0; col < columns.length; col++) {
             int length = Math.max(Math.max(columns[col].getHeaderWidth(), columns[col].getFooterWidth()), result[col]);
-            result[col] = Math.min(columns[col].getMaxWidth(), length + 2 * PADDING);
+            result[col] = Math.max(Math.min(columns[col].getMaxWidth(), length + 2 * PADDING), columns[col].getMinWidth());
         }
         return result;
     }
