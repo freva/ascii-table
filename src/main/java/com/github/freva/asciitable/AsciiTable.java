@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AsciiTable {
-    private static final int MIN_PADDING = 1;
+    private static final int PADDING = 1;
 
     public static final Character[] NO_BORDERS = new Character[29];
 
@@ -126,9 +126,7 @@ public class AsciiTable {
         return lines;
     }
 
-    /**
-     * Returns a line/border row in the resulting table
-     */
+    /** Returns a line/border row in the resulting table */
     private static String lineRow(int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) {
         StringBuilder row = new StringBuilder(getTableWidth(colWidths));
         if (left != null) row.append((char) left);
@@ -152,7 +150,7 @@ public class AsciiTable {
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
                     return LineUtils.lines(text)
-                            .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* MIN_PADDING).stream())
+                            .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* PADDING).stream())
                             .collect(Collectors.toList());
                 })
                 .collect(Collectors.toList());
@@ -166,7 +164,7 @@ public class AsciiTable {
             if (left != null) row.append((char) left);
             for (int col = 0; col < colWidths.length; col++) {
                 String item = linesContents.get(col).size() <= line ? "" : linesContents.get(col).get(line);
-                appendJustified(row, item, horizontalAligns[col], colWidths[col], MIN_PADDING);
+                appendJustified(row, item, horizontalAligns[col], colWidths[col], PADDING);
                 if (columnSeparator != null && col != colWidths.length - 1) row.append((char) columnSeparator);
             }
             if (right != null) row.append((char) right);
@@ -188,7 +186,7 @@ public class AsciiTable {
 
         for (int col = 0; col < columns.length; col++) {
             int length = Math.max(Math.max(columns[col].getHeaderWidth(), columns[col].getFooterWidth()), result[col]);
-            result[col] = Math.min(columns[col].getMaxColumnWidth(), length + 2 * MIN_PADDING);
+            result[col] = Math.max(Math.min(columns[col].getMaxWidth(), length + 2 * PADDING), columns[col].getMinWidth());
         }
         return result;
     }
@@ -202,7 +200,7 @@ public class AsciiTable {
 
     /** Returns the width of each line in resulting table not counting the line break character(s) */
     private static int getTableWidth(int[] colWidths) {
-        return Arrays.stream(colWidths).sum() + MIN_PADDING * (colWidths.length + 1) - 1;
+        return Arrays.stream(colWidths).sum() + PADDING * (colWidths.length + 1) - 1;
     }
 
     /**

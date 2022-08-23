@@ -20,7 +20,7 @@ public class AsciiTableTest {
             new Planet(4, "Mars", 0.532, 0.11, "Carbon dioxide, Nitrogen, Argon"));
 
     @Test
-    public void testTableDefault() {
+    public void tableDefault() {
         String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
                 {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
                 {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
@@ -49,7 +49,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableWithHeader() {
+    public void tableWithHeader() {
         String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
         String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
                 {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
@@ -81,7 +81,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableWithHeaderAndFooter() {
+    public void tableWithHeaderAndFooter() {
         String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
         String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
                 {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
@@ -115,7 +115,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultNoOutsideBorder() {
+    public void tableDefaultNoOutsideBorder() {
         String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER, planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
@@ -170,7 +170,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultNoDataSeparatorsNoOutsideBorders() {
+    public void tableDefaultNoDataSeparatorsNoOutsideBorders() {
         String actual = AsciiTable.getTable(AsciiTable.BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER, planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
@@ -195,7 +195,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultNoBorders() {
+    public void tableDefaultNoBorders() {
         String actual = AsciiTable.getTable(AsciiTable.NO_BORDERS, planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
@@ -218,7 +218,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableDefaultFancyBorders() {
+    public void tableDefaultFancyBorders() {
         String actual = AsciiTable.getTable(AsciiTable.FANCY_ASCII, planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").with(planet -> planet.name),
@@ -248,7 +248,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableWithAlignments() {
+    public void tableWithAlignments() {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
                 new Column().with(planet -> Integer.toString(planet.num)),
                 new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
@@ -278,46 +278,46 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testTableWithMaxWidth() {
+    public void tableWithMinMaxWidth() {
         String actual = AsciiTable.getTable(planets, Arrays.asList(
-                new Column().with(planet -> Integer.toString(planet.num)),
-                new Column().header("Name").with(planet -> planet.name),
+                new Column().minWidth(4).with(planet -> Integer.toString(planet.num)),
+                new Column().header("Name").minWidth(2).with(planet -> planet.name),
                 new Column().header("Diameter").with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
                 new Column().header("Mass").with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
-                new Column().header("Atmosphere").maxColumnWidth(8).with(planet -> planet.atmosphere)));
+                new Column().header("Atmosphere").maxWidth(8).with(planet -> planet.atmosphere)));
 
         String expected = String.join(System.lineSeparator(),
-                "+---+---------+----------+------+--------+",
-                "|   | Name    | Diameter | Mass | Atmosp |",
-                "|   |         |          |      | here   |",
-                "+---+---------+----------+------+--------+",
-                "| 1 | Mercury |    0.382 | 0.06 | minima |",
-                "|   |         |          |      |      l |",
-                "+---+---------+----------+------+--------+",
-                "| 2 |   Venus |    0.949 | 0.82 | Carbon |",
-                "|   |         |          |      | dioxid |",
-                "|   |         |          |      |     e, |",
-                "|   |         |          |      | Nitrog |",
-                "|   |         |          |      |     en |",
-                "+---+---------+----------+------+--------+",
-                "| 3 |   Earth |    1.000 | 1.00 | Nitrog |",
-                "|   |         |          |      |    en, |",
-                "|   |         |          |      | Oxygen |",
-                "|   |         |          |      |      , |",
-                "|   |         |          |      |  Argon |",
-                "+---+---------+----------+------+--------+",
-                "| 4 |    Mars |    0.532 | 0.11 | Carbon |",
-                "|   |         |          |      | dioxid |",
-                "|   |         |          |      |     e, |",
-                "|   |         |          |      | Nitrog |",
-                "|   |         |          |      |    en, |",
-                "|   |         |          |      |  Argon |",
-                "+---+---------+----------+------+--------+");
+                "+----+---------+----------+------+--------+",
+                "|    | Name    | Diameter | Mass | Atmosp |",
+                "|    |         |          |      | here   |",
+                "+----+---------+----------+------+--------+",
+                "|  1 | Mercury |    0.382 | 0.06 | minima |",
+                "|    |         |          |      |      l |",
+                "+----+---------+----------+------+--------+",
+                "|  2 |   Venus |    0.949 | 0.82 | Carbon |",
+                "|    |         |          |      | dioxid |",
+                "|    |         |          |      |     e, |",
+                "|    |         |          |      | Nitrog |",
+                "|    |         |          |      |     en |",
+                "+----+---------+----------+------+--------+",
+                "|  3 |   Earth |    1.000 | 1.00 | Nitrog |",
+                "|    |         |          |      |    en, |",
+                "|    |         |          |      | Oxygen |",
+                "|    |         |          |      |      , |",
+                "|    |         |          |      |  Argon |",
+                "+----+---------+----------+------+--------+",
+                "|  4 |    Mars |    0.532 | 0.11 | Carbon |",
+                "|    |         |          |      | dioxid |",
+                "|    |         |          |      |     e, |",
+                "|    |         |          |      | Nitrog |",
+                "|    |         |          |      |    en, |",
+                "|    |         |          |      |  Argon |",
+                "+----+---------+----------+------+--------+");
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testTableWithParagraphs() {
+    public void tableWithParagraphs() {
         Map<String, String> map = new LinkedHashMap<>();
         map.put("Ut sagittis facilisis", String.join("\r\n",
                 "Duis nec urna magna. Pellentesque accumsan metus vel metus convallis, a tempus enim pretium.",
@@ -331,7 +331,7 @@ public class AsciiTableTest {
 
         String actual = AsciiTable.getTable(map.entrySet(), Arrays.asList(
                 new Column().header("Key").with(Map.Entry::getKey),
-                new Column().header("Value").dataAlign(LEFT).maxColumnWidth(30).with(Map.Entry::getValue)));
+                new Column().header("Value").dataAlign(LEFT).maxWidth(30).with(Map.Entry::getValue)));
 
         String expected = String.join(System.lineSeparator(),
                 "+-----------------------+------------------------------+",
@@ -363,7 +363,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testValidateNullInHeader() {
+    public void validateNullInHeader() {
         String[] headers = {"Lorem", null, "Dolor"};
         String[][] data = {{"11", "12", "13"}, {"21", null, "23"}};
         String actual = AsciiTable.getTable(headers, null, data);
@@ -379,7 +379,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testValidateNullInData() {
+    public void validateNullInData() {
         String[] headers = {"Lorem", "Ipsum", "Dolor"};
         String[][] data = {{"11", "12", "13"}, {"21", null, "23"}};
         String actual = AsciiTable.getTable(headers, null, data);
@@ -395,7 +395,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testValidateDifferentSizedHeaderDataColumns() {
+    public void validateDifferentSizedHeaderDataColumns() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
 
         // Multiple different sized data columns, but the widest is as wide as the header
@@ -430,7 +430,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testValidateTooFewHeaderColumns() {
+    public void validateTooFewHeaderColumns() {
         String[] headers = {"Lorem", "Ipsum", "Dolor"};
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
         String actual = AsciiTable.getTable(headers, null, data);
@@ -448,7 +448,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testObjectDataArray() {
+    public void objectDataArray() {
         Object[][] data = {{"String", 123, Instant.ofEpochSecond(1621152246)}};
         String actual = AsciiTable.getTable(data);
         String expected = String.join(System.lineSeparator(),
@@ -471,14 +471,14 @@ public class AsciiTableTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testValidateTooFewBorderChars() {
+    public void validateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
         AsciiTable.getTable(new Character[10], headers, null, data);
     }
 
     @Test
-    public void testTextSplitting() {
+    public void textSplitting() {
         String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pretium eu dolor sodales rutrum. " +
                 "Also here is a very long link: http://www.example.tld/some/resource/file.ext a few final words";
         List<String> expected = Arrays.asList(
@@ -490,7 +490,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void testJustify() {
+    public void justify() {
         String string = "test";
         String[] expected = {string + "          ", "     " + string + "     ", "          " + string};
         String[] expectedWithPadding = {"   " + string + "       ", "     " + string + "     ", "       " + string + "   "};
