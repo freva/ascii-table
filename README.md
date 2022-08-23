@@ -93,7 +93,7 @@ System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().header("Name").with(planet -> planet.name),
         new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
         new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
-        new Column().header("Atmosphere Composition").maxColumnWidth(12).with(planet -> planet.atmosphere))));
+        new Column().header("Atmosphere Composition").maxWidth(12).with(planet -> planet.atmosphere))));
 ```
 Prints
 ```
