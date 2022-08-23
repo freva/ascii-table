@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class AsciiTable {
     private static final int PADDING = 1;
@@ -85,40 +86,36 @@ public class AsciiTable {
                 .toArray(Column[]::new);
         int[] colWidths = getColWidths(columns, stringData);
 
-        HorizontalAlign[] headerAligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
-        HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
-        HorizontalAlign[] footerAligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
-
-        String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
-        String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
-
-        List<String> tableRows = getTableRows(colWidths, headerAligns, dataAligns, footerAligns, borderChars, header, stringData, footer);
-
+        List<String> tableRows = getTableRows(colWidths, columns, borderChars, stringData);
         return tableRows.stream()
                 .filter(line -> !line.isEmpty())
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
-    private static List<String> getTableRows(int[] colWidths, HorizontalAlign[] headerAligns,
-                                             HorizontalAlign[] dataAligns, HorizontalAlign[] footerAligns,
-                                             Character[] borderChars, String[] header, String[][] data, String[] footer) {
+    private static List<String> getTableRows(int[] colWidths, Column[] columns, Character[] borderChars, String[][] data) {
+        OverflowBehaviour[] overflows = Arrays.stream(columns).map(Column::getOverflowBehaviour).toArray(OverflowBehaviour[]::new);
         LinkedList<String> lines = new LinkedList<>();
         lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
 
-        if (! Arrays.stream(header).allMatch(Objects::isNull)) {
-            lines.addAll(dataRow(colWidths, headerAligns, header, borderChars[4], borderChars[5], borderChars[6]));
+        if (Arrays.stream(columns).map(Column::getHeader).anyMatch(Objects::nonNull)) {
+            HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
+            String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
+            lines.addAll(dataRow(colWidths, overflows, aligns, header, borderChars[4], borderChars[5], borderChars[6]));
             lines.add(lineRow(colWidths, borderChars[7], borderChars[8], borderChars[9], borderChars[10]));
         }
 
         String contentRowBorder = lineRow(colWidths, borderChars[14], borderChars[15], borderChars[16], borderChars[17]);
+        HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
         for (String[] dataRow : data) {
-            lines.addAll(dataRow(colWidths, dataAligns, dataRow, borderChars[11], borderChars[12], borderChars[13]));
+            lines.addAll(dataRow(colWidths, overflows, dataAligns, dataRow, borderChars[11], borderChars[12], borderChars[13]));
             lines.add(contentRowBorder);
         }
         if (data.length > 0) lines.removeLast();
-        if (! Arrays.stream(footer).allMatch(Objects::isNull)) {
+        if (Arrays.stream(columns).map(Column::getFooter).anyMatch(Objects::nonNull)) {
+            HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
+            String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
             lines.add(lineRow(colWidths, borderChars[18], borderChars[19], borderChars[20], borderChars[21]));
-            lines.addAll(dataRow(colWidths, footerAligns, footer, borderChars[22], borderChars[23], borderChars[24]));
+            lines.addAll(dataRow(colWidths, overflows, aligns, footer, borderChars[22], borderChars[23], borderChars[24]));
         }
 
         lines.add(lineRow(colWidths, borderChars[25], borderChars[26], borderChars[27], borderChars[28]));
@@ -144,13 +141,23 @@ public class AsciiTable {
      *  - Contents of a row exceed maxCharInLine for that row
      *  - Contents of a row we're already multiline
      */
-    private static List<String> dataRow(int[] colWidths, HorizontalAlign[] horizontalAligns, String[] contents,
-                                 Character left, Character columnSeparator, Character right) {
+    private static List<String> dataRow(int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
+                                        String[] contents, Character left, Character columnSeparator, Character right) {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
                     return LineUtils.lines(text)
-                            .flatMap(paragraph -> splitTextIntoLinesOfMaxLength(paragraph, colWidths[i] - 2* PADDING).stream())
+                            .flatMap(paragraph -> {
+                                int limit = colWidths[i] - 2 * PADDING;
+                                if (paragraph.length() <= limit) return Stream.of(paragraph);
+
+                                switch (overflows[i]) {
+                                    case CLIP: return Stream.of(paragraph.substring(0, limit));
+                                    case ELLIPSIS: return Stream.of(paragraph.substring(0, limit - 1) + '…');
+                                    default:
+                                    case NEWLINE: return splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
+                                }
+                            })
                             .collect(Collectors.toList());
                 })
                 .collect(Collectors.toList());

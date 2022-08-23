@@ -18,6 +18,17 @@ public class AsciiTableTest {
             new Planet(2, "Venus", 0.949, 0.82, "Carbon dioxide, Nitrogen"),
             new Planet(3, "Earth", 1.0, 1.0, "Nitrogen, Oxygen, Argon"),
             new Planet(4, "Mars", 0.532, 0.11, "Carbon dioxide, Nitrogen, Argon"));
+    private static final Map<String, String> paragraphs = new LinkedHashMap<String, String>(){{
+        put("Ut sagittis facilisis", String.join("\r\n",
+                "Duis nec urna magna. Pellentesque accumsan metus vel metus convallis, a tempus enim pretium.",
+                "Integer hendrerit enim tellus, et fermentum diam sollicitudin eleifend.",
+                "Cras condimentum magna non leo mattis posuere."));
+        put("Nulla ac scelerisque", String.join("\n",
+                "Nullam vitae nisl vel turpis commodo ultrices.",
+                "Fusce hendrerit lobortis nibh a finibus.",
+                "In faucibus arcu at odio commodo facilisis."));
+        put("Nullam ante erat", "Nam sed convallis purus arcu");
+    }};
 
     @Test
     public void tableDefault() {
@@ -317,49 +328,70 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void tableWithParagraphs() {
-        Map<String, String> map = new LinkedHashMap<>();
-        map.put("Ut sagittis facilisis", String.join("\r\n",
-                "Duis nec urna magna. Pellentesque accumsan metus vel metus convallis, a tempus enim pretium.",
-                "Integer hendrerit enim tellus, et fermentum diam sollicitudin eleifend.",
-                "Cras condimentum magna non leo mattis posuere."));
-        map.put("Nulla ac scelerisque", String.join("\n",
-                "Nullam vitae nisl vel turpis commodo ultrices.",
-                "Fusce hendrerit lobortis nibh a finibus.",
-                "In faucibus arcu at odio commodo facilisis."));
-        map.put("Nullam ante erat", "In tincidunt pretium dui, ut sagittis sem tincidunt vitae. Nam sed convallis purus, id porttitor arcu.");
+    public void tableWithParagraphsNewlineOverflow() {
+        assertParagraphs(OverflowBehaviour.NEWLINE,
+                "+------------------+------------------------------+",
+                "| Long first       | An even                      |",
+                "| header           | longer second super header   |",
+                "|                  | with line breaks             |",
+                "+------------------+------------------------------+",
+                "|      Ut sagittis | Duis nec urna magna.         |",
+                "|        facilisis | Pellentesque accumsan metus  |",
+                "|                  | vel metus convallis, a       |",
+                "|                  | tempus enim pretium.         |",
+                "|                  | Integer hendrerit enim       |",
+                "|                  | tellus, et fermentum diam    |",
+                "|                  | sollicitudin eleifend.       |",
+                "|                  | Cras condimentum magna non   |",
+                "|                  | leo mattis posuere.          |",
+                "+------------------+------------------------------+",
+                "|         Nulla ac | Nullam vitae nisl vel turpis |",
+                "|      scelerisque | commodo ultrices.            |",
+                "|                  | Fusce hendrerit lobortis     |",
+                "|                  | nibh a finibus.              |",
+                "|                  | In faucibus arcu at odio     |",
+                "|                  | commodo facilisis.           |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
+    }
 
-        String actual = AsciiTable.getTable(map.entrySet(), Arrays.asList(
-                new Column().header("Key").with(Map.Entry::getKey),
-                new Column().header("Value").dataAlign(LEFT).maxWidth(30).with(Map.Entry::getValue)));
+    @Test
+    public void tableWithParagraphsClipOverflow() {
+        assertParagraphs(OverflowBehaviour.CLIP,
+                "+------------------+------------------------------+",
+                "| Long first heade | An even                      |",
+                "|                  | longer second super header w |",
+                "+------------------+------------------------------+",
+                "| Ut sagittis faci | Duis nec urna magna. Pellent |",
+                "|                  | Integer hendrerit enim tellu |",
+                "|                  | Cras condimentum magna non l |",
+                "+------------------+------------------------------+",
+                "| Nulla ac sceleri | Nullam vitae nisl vel turpis |",
+                "|                  | Fusce hendrerit lobortis nib |",
+                "|                  | In faucibus arcu at odio com |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
+    }
 
-        String expected = String.join(System.lineSeparator(),
-                "+-----------------------+------------------------------+",
-                "| Key                   | Value                        |",
-                "+-----------------------+------------------------------+",
-                "| Ut sagittis facilisis | Duis nec urna magna.         |",
-                "|                       | Pellentesque accumsan metus  |",
-                "|                       | vel metus convallis, a       |",
-                "|                       | tempus enim pretium.         |",
-                "|                       | Integer hendrerit enim       |",
-                "|                       | tellus, et fermentum diam    |",
-                "|                       | sollicitudin eleifend.       |",
-                "|                       | Cras condimentum magna non   |",
-                "|                       | leo mattis posuere.          |",
-                "+-----------------------+------------------------------+",
-                "|  Nulla ac scelerisque | Nullam vitae nisl vel turpis |",
-                "|                       | commodo ultrices.            |",
-                "|                       | Fusce hendrerit lobortis     |",
-                "|                       | nibh a finibus.              |",
-                "|                       | In faucibus arcu at odio     |",
-                "|                       | commodo facilisis.           |",
-                "+-----------------------+------------------------------+",
-                "|      Nullam ante erat | In tincidunt pretium dui, ut |",
-                "|                       | sagittis sem tincidunt       |",
-                "|                       | vitae. Nam sed convallis     |",
-                "|                       | purus, id porttitor arcu.    |",
-                "+-----------------------+------------------------------+");
-        assertEquals(expected, actual);
+    @Test
+    public void tableWithParagraphsEllipsisOverflow() {
+        assertParagraphs(OverflowBehaviour.ELLIPSIS,
+                "+------------------+------------------------------+",
+                "| Long first head… | An even                      |",
+                "|                  | longer second super header … |",
+                "+------------------+------------------------------+",
+                "| Ut sagittis fac… | Duis nec urna magna. Pellen… |",
+                "|                  | Integer hendrerit enim tell… |",
+                "|                  | Cras condimentum magna non … |",
+                "+------------------+------------------------------+",
+                "| Nulla ac sceler… | Nullam vitae nisl vel turpi… |",
+                "|                  | Fusce hendrerit lobortis ni… |",
+                "|                  | In faucibus arcu at odio co… |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
     }
 
     @Test
@@ -463,7 +495,7 @@ public class AsciiTableTest {
         String[][] data = {{"String", "First line\nSecond line"}};
         String actual = AsciiTable.getTable(data);
         String expected = String.join(System.lineSeparator(),
-                "+--------+-------------+\n" +
+                "+--------+-------------+",
                 "| String |  First line |",
                 "|        | Second line |",
                 "+--------+-------------+");
@@ -508,6 +540,15 @@ public class AsciiTableTest {
 
         // Since padding is included in length, justifying to same length with padding should be no-op
         assertJustify(string, string, CENTER, string.length(), 3);
+    }
+
+    private static void assertParagraphs(OverflowBehaviour overflowBehaviour, String... expectedLines) {
+        String actual = AsciiTable.getTable(paragraphs.entrySet(), Arrays.asList(
+                new Column().header("Long first header").maxWidth(18, overflowBehaviour).with(Map.Entry::getKey),
+                new Column().header("An even\nlonger second super header with line breaks").dataAlign(LEFT).maxWidth(30, overflowBehaviour).with(Map.Entry::getValue)));
+
+        String expected = String.join(System.lineSeparator(), expectedLines);
+        assertEquals(expected, actual);
     }
 
     private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) {
