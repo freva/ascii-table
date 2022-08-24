@@ -10,19 +10,20 @@ public class Column {
     private HorizontalAlign footerAlign;
     private int minWidth;
     private int maxWidth;
+    private OverflowBehaviour overflowBehaviour;
 
     public Column() {
-        this(null, null, HorizontalAlign.LEFT, HorizontalAlign.RIGHT, HorizontalAlign.LEFT, 0, 80);
+        this(null, null, HorizontalAlign.LEFT, HorizontalAlign.RIGHT, HorizontalAlign.LEFT, 0, 80, OverflowBehaviour.NEWLINE);
     }
 
     @Deprecated
     public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
                   HorizontalAlign footerAlign, int maxWidth) {
-        this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth);
+        this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth, OverflowBehaviour.NEWLINE);
     }
 
     public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
-                  HorizontalAlign footerAlign, int minWidth, int maxWidth) {
+                  HorizontalAlign footerAlign, int minWidth, int maxWidth, OverflowBehaviour overflowBehaviour) {
         this.header = header;
         this.footer = footer;
         this.headerAlign = headerAlign;
@@ -30,6 +31,7 @@ public class Column {
         this.footerAlign = footerAlign;
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
+        this.overflowBehaviour = overflowBehaviour;
     }
 
     public String getHeader() {
@@ -64,6 +66,10 @@ public class Column {
     @Deprecated
     public int getMaxColumnWidth() {
         return maxWidth;
+    }
+
+    public OverflowBehaviour getOverflowBehaviour() {
+        return overflowBehaviour;
     }
 
     public int getHeaderWidth() {
@@ -111,7 +117,13 @@ public class Column {
 
     /** Max width of this column, if data exceeds this length, it will be broken into multiple lines */
     public Column maxWidth(int maxWidth) {
+        return maxWidth(maxWidth, OverflowBehaviour.NEWLINE);
+    }
+
+    /** Max width of this column, if data exceeds this length, it will be broken into multiple lines */
+    public Column maxWidth(int maxWidth, OverflowBehaviour overflowBehaviour) {
         this.maxWidth = maxWidth;
+        this.overflowBehaviour = overflowBehaviour;
         return this;
     }
 

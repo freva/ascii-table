@@ -5,7 +5,7 @@ Easily create and customize simple ASCII tables in Java. Based off
 
 ## How to get it?
 Maven:
-```
+```xml
 <dependency>
   <groupId>com.github.freva</groupId>
   <artifactId>ascii-table</artifactId>
@@ -18,7 +18,7 @@ compile 'com.github.freva:ascii-table:1.2.0'
 ```
 
 ## Basic case
-```
+```java
 String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
 String[][] data = {
         {"1", "Mercury", "0.382", "0.06", "minimal"},
@@ -44,7 +44,7 @@ Will print
 ```
 
 ## Table from Collections
-```
+```java
 List<Planet> planets = Arrays.asList(
         new Planet(1, "Mercury", 0.382, 0.06, "minimal"),
         new Planet(2, "Venus", 0.949, 0.82, "Carbon dioxide, Nitrogen"),
@@ -62,7 +62,7 @@ Prints the same table as above.
 
 ## Column alignments
 Horizontally align header and data columns independently to left, right and center:
-```
+```java
 System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().with(planet -> Integer.toString(planet.num)),
         new Column().header("Name").headerAlign(HorizontalAlign.CENTER).dataAlign(HorizontalAlign.LEFT).with(planet -> planet.name),
@@ -85,11 +85,11 @@ Prints
 +---+---------+----------+------+---------------------------------+
 ```
 
-## Max column width
+## Min/max column width
 Limit any column to certain width:
-```
+```java
 System.out.println(AsciiTable.getTable(planets, Arrays.asList(
-        new Column().with(planet -> Integer.toString(planet.num)),
+        new Column().minWidth(5).with(planet -> Integer.toString(planet.num)),
         new Column().header("Name").with(planet -> planet.name),
         new Column().header("Diameter").with(planet -> String.format("%.03f", planet.diameter)),
         new Column().header("Mass").with(planet -> String.format("%.02f", planet.mass)),
@@ -97,27 +97,67 @@ System.out.println(AsciiTable.getTable(planets, Arrays.asList(
 ```
 Prints
 ```
-+---+---------+----------+------+------------+
-|   | Name    | Diameter | Mass | Atmosphere |
-|   |         |          |      | Compositio |
-|   |         |          |      | n          |
-+---+---------+----------+------+------------+
-| 1 | Mercury |    0.382 | 0.06 |    minimal |
-+---+---------+----------+------+------------+
-| 2 |   Venus |    0.949 | 0.82 |     Carbon |
-|   |         |          |      |   dioxide, |
-|   |         |          |      |   Nitrogen |
-+---+---------+----------+------+------------+
-| 3 |   Earth |    1.000 | 1.00 |  Nitrogen, |
-|   |         |          |      |    Oxygen, |
-|   |         |          |      |      Argon |
-+---+---------+----------+------+------------+
-| 4 |    Mars |    0.532 | 0.11 |     Carbon |
-|   |         |          |      |   dioxide, |
-|   |         |          |      |  Nitrogen, |
-|   |         |          |      |      Argon |
-+---+---------+----------+------+------------+
++-----+---------+----------+------+--------+
+|     | Name    | Diameter | Mass | Atmosp |
+|     |         |          |      | here   |
++-----+---------+----------+------+--------+
+|   1 | Mercury |    0.382 | 0.06 | minima |
+|     |         |          |      |      l |
++-----+---------+----------+------+--------+
+|   2 |   Venus |    0.949 | 0.82 | Carbon |
+|     |         |          |      | dioxid |
+|     |         |          |      |     e, |
+|     |         |          |      | Nitrog |
+|     |         |          |      |     en |
++-----+---------+----------+------+--------+
+|   3 |   Earth |    1.000 | 1.00 | Nitrog |
+|     |         |          |      |    en, |
+|     |         |          |      | Oxygen |
+|     |         |          |      |      , |
+|     |         |          |      |  Argon |
++-----+---------+----------+------+--------+
+|   4 |    Mars |    0.532 | 0.11 | Carbon |
+|     |         |          |      | dioxid |
+|     |         |          |      |     e, |
+|     |         |          |      | Nitrog |
+|     |         |          |      |    en, |
+|     |         |          |      |  Argon |
++-----+---------+----------+------+--------+
 ```
+
+## Controlling overflow behaviour
+By default when a cell reaches max column width, a newline is inserted before remainder of the text. Other possible
+behaviours are clipping and ellipsis:
+```java
+System.out.println(AsciiTable.getTable(planets, Arrays.asList(
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.NEWLINE).with(planet -> planet.atmosphere),
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP).with(planet -> planet.atmosphere),
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS).with(planet -> planet.atmosphere))));
+```
+Prints
+```
++------------+------------+------------+
+| Atmosphere | Atmosphere | Atmospher… |
+| Compositio |            |            |
+| n          |            |            |
++------------+------------+------------+
+|    minimal |    minimal |    minimal |
++------------+------------+------------+
+|     Carbon | Carbon dio | Carbon di… |
+|   dioxide, |            |            |
+|   Nitrogen |            |            |
++------------+------------+------------+
+|  Nitrogen, | Nitrogen,  | Nitrogen,… |
+|    Oxygen, |            |            |
+|      Argon |            |            |
++------------+------------+------------+
+|     Carbon | Carbon dio | Carbon di… |
+|   dioxide, |            |            |
+|  Nitrogen, |            |            |
+|      Argon |            |            |
++------------+------------+------------+
+```
+
 **Bonus:** The original line breaks (`System.lineSeparator()`) are always preserved,
 so you can split your text however you want before making the table.
 
@@ -126,7 +166,7 @@ Special row at the end of the table that can be used to for example repeat the
 header if the table is really long, or display some summary information such as
 average or totals.
 
-```
+```java
 System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().with(planet -> Integer.toString(planet.num)),
         new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
@@ -156,7 +196,7 @@ Prints
 ```
 
 ## Border styles
-```
+```java
 Character[] borderStyle = ...;
 System.out.println(AsciiTable.getTable(borderStyles, planets, Arrays.asList(
         new Column().with(planet -> Integer.toString(planet.num)),
@@ -248,7 +288,7 @@ ___
 Border styles is a `Character` array of length 29 and you can configure your own 
 styles by passing in different array. To see which element in `Character` array 
 corresponds to which element in the table:
-```
+```java
 Character[] borderStyles = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123".chars().mapToObj(c -> (char)c).toArray(Character[]::new);
 ```
 Prints
