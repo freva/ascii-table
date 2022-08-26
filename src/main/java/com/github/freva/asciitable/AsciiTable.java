@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 public class AsciiTable {
     private static final int PADDING = 1;
+    private static final char ELLIPSIS = '…';
 
     public static final Character[] NO_BORDERS = new Character[29];
 
@@ -141,6 +142,7 @@ public class AsciiTable {
      *  - Contents of a row exceed maxCharInLine for that row
      *  - Contents of a row we're already multiline
      */
+    @SuppressWarnings("deprecated")
     private static List<String> dataRow(int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
                                         String[] contents, Character left, Character columnSeparator, Character right) {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
@@ -152,8 +154,12 @@ public class AsciiTable {
                                 if (paragraph.length() <= limit) return Stream.of(paragraph);
 
                                 switch (overflows[i]) {
-                                    case CLIP: return Stream.of(paragraph.substring(0, limit));
-                                    case ELLIPSIS: return Stream.of(paragraph.substring(0, limit - 1) + '…');
+                                    case CLIP_LEFT: return Stream.of(paragraph.substring(paragraph.length() - limit));
+                                    case CLIP:
+                                    case CLIP_RIGHT: return Stream.of(paragraph.substring(0, limit));
+                                    case ELLIPSIS_LEFT: return Stream.of(ELLIPSIS + paragraph.substring(paragraph.length() - limit + 1));
+                                    case ELLIPSIS:
+                                    case ELLIPSIS_RIGHT: return Stream.of(paragraph.substring(0, limit - 1) + ELLIPSIS);
                                     default:
                                     case NEWLINE: return splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
                                 }

@@ -357,8 +357,27 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void tableWithParagraphsClipOverflow() {
-        assertParagraphs(OverflowBehaviour.CLIP,
+    public void tableWithParagraphsClipLeftOverflow() {
+        assertParagraphs(OverflowBehaviour.CLIP_LEFT,
+                "+------------------+------------------------------+",
+                "| ong first header | An even                      |",
+                "|                  | uper header with line breaks |",
+                "+------------------+------------------------------+",
+                "| gittis facilisis | llis, a tempus enim pretium. |",
+                "|                  |  diam sollicitudin eleifend. |",
+                "|                  | agna non leo mattis posuere. |",
+                "+------------------+------------------------------+",
+                "| a ac scelerisque | vel turpis commodo ultrices. |",
+                "|                  | rit lobortis nibh a finibus. |",
+                "|                  | u at odio commodo facilisis. |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
+    }
+
+    @Test
+    public void tableWithParagraphsClipRightOverflow() {
+        assertParagraphs(OverflowBehaviour.CLIP_RIGHT,
                 "+------------------+------------------------------+",
                 "| Long first heade | An even                      |",
                 "|                  | longer second super header w |",
@@ -376,8 +395,27 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void tableWithParagraphsEllipsisOverflow() {
-        assertParagraphs(OverflowBehaviour.ELLIPSIS,
+    public void tableWithParagraphsEllipsisLeftOverflow() {
+        assertParagraphs(OverflowBehaviour.ELLIPSIS_LEFT,
+                "+------------------+------------------------------+",
+                "| …ng first header | An even                      |",
+                "|                  | …per header with line breaks |",
+                "+------------------+------------------------------+",
+                "| …ittis facilisis | …lis, a tempus enim pretium. |",
+                "|                  | …diam sollicitudin eleifend. |",
+                "|                  | …gna non leo mattis posuere. |",
+                "+------------------+------------------------------+",
+                "| … ac scelerisque | …el turpis commodo ultrices. |",
+                "|                  | …it lobortis nibh a finibus. |",
+                "|                  | … at odio commodo facilisis. |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
+    }
+
+    @Test
+    public void tableWithParagraphsEllipsisRightOverflow() {
+        assertParagraphs(OverflowBehaviour.ELLIPSIS_RIGHT,
                 "+------------------+------------------------------+",
                 "| Long first head… | An even                      |",
                 "|                  | longer second super header … |",

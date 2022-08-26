@@ -131,31 +131,33 @@ behaviours are clipping and ellipsis:
 ```java
 System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.NEWLINE).with(planet -> planet.atmosphere),
-        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP).with(planet -> planet.atmosphere),
-        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS).with(planet -> planet.atmosphere))));
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP_LEFT).with(planet -> planet.atmosphere),
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP_RIGHT).with(planet -> planet.atmosphere),
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_LEFT).with(planet -> planet.atmosphere),
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_RIGHT).with(planet -> planet.atmosphere))));
 ```
 Prints
 ```
-+------------+------------+------------+
-| Atmosphere | Atmosphere | Atmospher… |
-| Compositio |            |            |
-| n          |            |            |
-+------------+------------+------------+
-|    minimal |    minimal |    minimal |
-+------------+------------+------------+
-|     Carbon | Carbon dio | Carbon di… |
-|   dioxide, |            |            |
-|   Nitrogen |            |            |
-+------------+------------+------------+
-|  Nitrogen, | Nitrogen,  | Nitrogen,… |
-|    Oxygen, |            |            |
-|      Argon |            |            |
-+------------+------------+------------+
-|     Carbon | Carbon dio | Carbon di… |
-|   dioxide, |            |            |
-|  Nitrogen, |            |            |
-|      Argon |            |            |
-+------------+------------+------------+
++------------+------------+------------+------------+------------+
+| Atmosphere | omposition | Atmosphere | …mposition | Atmospher… |
+| Compositio |            |            |            |            |
+| n          |            |            |            |            |
++------------+------------+------------+------------+------------+
+|    minimal |    minimal |    minimal |    minimal |    minimal |
++------------+------------+------------+------------+------------+
+|     Carbon | , Nitrogen | Carbon dio | … Nitrogen | Carbon di… |
+|   dioxide, |            |            |            |            |
+|   Nitrogen |            |            |            |            |
++------------+------------+------------+------------+------------+
+|  Nitrogen, | gen, Argon | Nitrogen,  | …en, Argon | Nitrogen,… |
+|    Oxygen, |            |            |            |            |
+|      Argon |            |            |            |            |
++------------+------------+------------+------------+------------+
+|     Carbon | gen, Argon | Carbon dio | …en, Argon | Carbon di… |
+|   dioxide, |            |            |            |            |
+|  Nitrogen, |            |            |            |            |
+|      Argon |            |            |            |            |
++------------+------------+------------+------------+------------+
 ```
 
 **Bonus:** The original line breaks (`System.lineSeparator()`) are always preserved,
