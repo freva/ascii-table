@@ -160,8 +160,8 @@ Prints
 +------------+------------+------------+------------+------------+
 ```
 
-**Bonus:** The original line breaks (`System.lineSeparator()`) are always preserved,
-so you can split your text however you want before making the table.
+**Bonus:** The original line breaks are always preserved, so you can split your 
+text however you want before making the table.
 
 ## Footer
 Special row at the end of the table that can be used to for example repeat the 
@@ -195,6 +195,28 @@ Prints
 +---+---------+----------+------+---------------------------------+
 |   | Average |  0.716   | 0.50 |                                 |
 +---+---------+----------+------+---------------------------------+
+```
+
+## Builder
+Using the builder from `AsciiTable.builder()` you can customize the table further, e.g. setting the 
+line separator or outputting the table to an `OutputStream`:
+```java
+try (OutputStream fos = Files.newOutputStream(Paths.get("table.txt"))) {
+    AsciiTable.builder()
+            .lineSeparator("\r\n")
+            .border(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER)
+            .data(planets, Arrays.asList(
+                    new Column().with(planet -> Integer.toString(planet.num)),
+                    new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
+                    new Column().header("Diameter").headerAlign(RIGHT).dataAlign(CENTER).footerAlign(CENTER)
+                            .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                            .with(planet -> String.format("%.03f", planet.diameter)),
+                    new Column().header("Mass").headerAlign(RIGHT).dataAlign(LEFT)
+                            .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                            .with(planet -> String.format("%.02f", planet.mass)),
+                    new Column().header("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)))
+            .writeTo(fos);
+}
 ```
 
 ## Border styles

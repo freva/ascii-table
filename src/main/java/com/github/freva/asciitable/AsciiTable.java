@@ -1,6 +1,7 @@
 package com.github.freva.asciitable;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -32,52 +33,8 @@ public class AsciiTable {
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
 
-    public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
-        return getTable(BASIC_ASCII, objects, columns);
-    }
-
-    public static <T> String getTable(Character[] borderChars, Collection<T> objects, List<ColumnData<T>> columns) {
-        Column[] rawColumns = columns.toArray(new Column[columns.size()]);
-        String[][] data = objects.stream()
-                .map(object ->  columns.stream()
-                        .map(dataColumn ->  dataColumn.getCellValue(object))
-                        .toArray(String[]::new))
-                .toArray(String[][]::new);
-
-        return getTable(borderChars, rawColumns, data);
-    }
-
-    public static String getTable(Object[][] data) {
-        return getTable((String[]) null, data);
-    }
-
-    public static String getTable(String[] header, Object[][] data) {
-        return getTable(BASIC_ASCII, header, null, data);
-    }
-
-    public static String getTable(String[] header, String[] footer, Object[][] data) {
-        return getTable(BASIC_ASCII, header, footer, data);
-    }
-
-    public static String getTable(Character[] borderChars, String[] header, String[] footer, Object[][] data) {
-        String[] nonNullHeader = header != null ? header : new String[0];
-        String[] nonNullFooter = footer != null ? footer : new String[0];
-
-        Column[] headerCol = IntStream.range(0, Math.max(nonNullHeader.length, nonNullFooter.length))
-                .mapToObj(index -> new Column()
-                        .header(index < nonNullHeader.length ? nonNullHeader[index] : null)
-                        .footer(index < nonNullFooter.length ? nonNullFooter[index] : null))
-                .toArray(Column[]::new);
-
-        return getTable(borderChars, headerCol, data);
-    }
-
-    public static String getTable(Column[] columns, Object[][] data) {
-        return getTable(BASIC_ASCII, columns, data);
-    }
-
-    public static String getTable(Character[] borderChars, Column[] rawColumns, Object[][] data) {
-        if (borderChars.length != NO_BORDERS.length)
+    static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] rawColumns, Object[][] data) throws IOException {
+        if (border.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
         String[][] stringData = objectArrayToString(data);
@@ -85,55 +42,57 @@ public class AsciiTable {
         Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
                 .toArray(Column[]::new);
-        int[] colWidths = getColWidths(columns, stringData);
 
-        List<String> tableRows = getTableRows(colWidths, columns, borderChars, stringData);
-        return tableRows.stream()
-                .filter(line -> !line.isEmpty())
-                .collect(Collectors.joining(System.lineSeparator()));
+        writeTable(osw, lineSeparator, border, columns, stringData);
     }
 
-    private static List<String> getTableRows(int[] colWidths, Column[] columns, Character[] borderChars, String[][] data) {
+    private static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] columns, String[][] data) throws IOException {
+        int[] colWidths = getColWidths(columns, data);
         OverflowBehaviour[] overflows = Arrays.stream(columns).map(Column::getOverflowBehaviour).toArray(OverflowBehaviour[]::new);
-        LinkedList<String> lines = new LinkedList<>();
-        lines.add(lineRow(colWidths, borderChars[0], borderChars[1], borderChars[2], borderChars[3]));
+        boolean insertNewline = writeLine(osw, colWidths, border[0], border[1], border[2], border[3]);
 
         if (Arrays.stream(columns).map(Column::getHeader).anyMatch(Objects::nonNull)) {
             HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
             String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
-            lines.addAll(dataRow(colWidths, overflows, aligns, header, borderChars[4], borderChars[5], borderChars[6]));
-            lines.add(lineRow(colWidths, borderChars[7], borderChars[8], borderChars[9], borderChars[10]));
+            if (insertNewline) osw.write(lineSeparator);
+            writeData(osw, colWidths, overflows, aligns, header, border[4], border[5], border[6], lineSeparator);
+            osw.write(lineSeparator);
+            insertNewline = writeLine(osw, colWidths, border[7], border[8], border[9], border[10]);
         }
 
-        String contentRowBorder = lineRow(colWidths, borderChars[14], borderChars[15], borderChars[16], borderChars[17]);
         HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
-        for (String[] dataRow : data) {
-            lines.addAll(dataRow(colWidths, overflows, dataAligns, dataRow, borderChars[11], borderChars[12], borderChars[13]));
-            lines.add(contentRowBorder);
+        for (int i = 0; i < data.length; i++) {
+            if (insertNewline) osw.write(lineSeparator);
+            writeData(osw, colWidths, overflows, dataAligns, data[i], border[11], border[12], border[13], lineSeparator);
+            if (i < data.length - 1) {
+                osw.write(lineSeparator);
+                insertNewline = writeLine(osw, colWidths, border[14], border[15], border[16], border[17]);
+            }
         }
-        if (data.length > 0) lines.removeLast();
+
         if (Arrays.stream(columns).map(Column::getFooter).anyMatch(Objects::nonNull)) {
+            osw.write(lineSeparator);
             HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
             String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
-            lines.add(lineRow(colWidths, borderChars[18], borderChars[19], borderChars[20], borderChars[21]));
-            lines.addAll(dataRow(colWidths, overflows, aligns, footer, borderChars[22], borderChars[23], borderChars[24]));
+            insertNewline = writeLine(osw, colWidths, border[18], border[19], border[20], border[21]);
+            if (insertNewline) osw.write(lineSeparator);
+            writeData(osw, colWidths, overflows, aligns, footer, border[22], border[23], border[24], lineSeparator);
         }
 
-        lines.add(lineRow(colWidths, borderChars[25], borderChars[26], borderChars[27], borderChars[28]));
-
-        return lines;
+        if (border[26] != null) osw.write(lineSeparator);
+        writeLine(osw, colWidths, border[25], border[26], border[27], border[28]);
     }
 
     /** Returns a line/border row in the resulting table */
-    private static String lineRow(int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) {
-        StringBuilder row = new StringBuilder(getTableWidth(colWidths));
-        if (left != null) row.append((char) left);
+    private static boolean writeLine(OutputStreamWriter osw, int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) throws IOException {
+        if (middle == null) return false;
+        if (left != null) osw.append(left);
         for (int col = 0; col < colWidths.length; col++) {
-            if (middle != null) appendRepeat(row, middle, colWidths[col]);
-            if (columnSeparator != null && col != colWidths.length - 1) row.append((char) columnSeparator);
+            writeRepeated(osw, middle, colWidths[col]);
+            if (columnSeparator != null && col != colWidths.length - 1) osw.write(columnSeparator);
         }
-        if (right != null) row.append((char) right);
-        return row.toString();
+        if (right != null) osw.append(right);
+        return true;
     }
 
     /**
@@ -143,8 +102,8 @@ public class AsciiTable {
      *  - Contents of a row we're already multiline
      */
     @SuppressWarnings("deprecated")
-    private static List<String> dataRow(int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
-                                        String[] contents, Character left, Character columnSeparator, Character right) {
+    private static void writeData(OutputStreamWriter osw, int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
+                                  String[] contents, Character left, Character columnSeparator, Character right, String lineSeparator) throws IOException {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
@@ -171,20 +130,16 @@ public class AsciiTable {
                 .mapToInt(List::size)
                 .max().orElse(0);
 
-        StringBuilder row = new StringBuilder(getTableWidth(colWidths));
-        List<String> lines = new ArrayList<>(numLines);
         for (int line = 0; line < numLines; line++) {
-            if (left != null) row.append((char) left);
+            if (left != null) osw.append(left);
             for (int col = 0; col < colWidths.length; col++) {
                 String item = linesContents.get(col).size() <= line ? "" : linesContents.get(col).get(line);
-                appendJustified(row, item, horizontalAligns[col], colWidths[col], PADDING);
-                if (columnSeparator != null && col != colWidths.length - 1) row.append((char) columnSeparator);
+                writeJustified(osw, item, horizontalAligns[col], colWidths[col], PADDING);
+                if (columnSeparator != null && col != colWidths.length - 1) osw.write(columnSeparator);
             }
-            if (right != null) row.append((char) right);
-            lines.add(row.toString());
-            row.setLength(0);
+            if (right != null) osw.append(right);
+            if (line < numLines - 1) osw.write(lineSeparator);
         }
-        return lines;
     }
 
     /** Returns the width of each column in the resulting table */
@@ -262,20 +217,20 @@ public class AsciiTable {
      * @param length Total new length
      * @param minPadding Length of padding to apply from both left and right before justifying
      */
-    static void appendJustified(StringBuilder sb, String str, HorizontalAlign align, int length, int minPadding) {
+    static void writeJustified(OutputStreamWriter osw, String str, HorizontalAlign align, int length, int minPadding) throws IOException {
         if (str.length() < length) {
             int leftPadding = align == HorizontalAlign.LEFT ?   minPadding :
                               align == HorizontalAlign.CENTER ? (length - str.length()) / 2 :
                                                                 length - str.length() - minPadding;
 
-            appendRepeat(sb, ' ', leftPadding);
-            sb.append(str);
-            appendRepeat(sb, ' ', length - str.length() - leftPadding);
-        } else sb.append(str);
+            writeRepeated(osw, ' ', leftPadding);
+            osw.write(str);
+            writeRepeated(osw, ' ', length - str.length() - leftPadding);
+        } else osw.write(str);
     }
 
-    private static void appendRepeat(StringBuilder sb, char c, int num) {
-        for (int i = 0; i < num; i++) sb.append(c);
+    private static void writeRepeated(OutputStreamWriter osw, char c, int num) throws IOException {
+        for (int i = 0; i < num; i++) osw.append(c);
     }
 
     private static String[][] objectArrayToString(Object[][] array) {
@@ -288,5 +243,43 @@ public class AsciiTable {
             }
         }
         return stringArray;
+    }
+
+    // ===== Public API =====
+
+    public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
+        return builder().data(objects, columns).asString();
+    }
+
+    public static <T> String getTable(Character[] border, Collection<T> objects, List<ColumnData<T>> columns) {
+        return builder().data(objects, columns).border(border).asString();
+    }
+
+    public static String getTable(Object[][] data) {
+        return builder().data(data).asString();
+    }
+
+    public static String getTable(String[] header, Object[][] data) {
+        return builder().header(header).data(data).asString();
+    }
+
+    public static String getTable(String[] header, String[] footer, Object[][] data) {
+        return builder().header(header).footer(footer).data(data).asString();
+    }
+
+    public static String getTable(Character[] border, String[] header, String[] footer, Object[][] data) {
+        return builder().header(header).footer(footer).border(border).data(data).asString();
+    }
+
+    public static String getTable(Column[] columns, Object[][] data) {
+        return builder().data(columns, data).asString();
+    }
+
+    public static String getTable(Character[] border, Column[] rawColumns, Object[][] data) {
+        return builder().data(rawColumns, data).border(border).asString();
+    }
+
+    public static AsciiTableBuilder builder() {
+        return new AsciiTableBuilder();
     }
 }

@@ -2,6 +2,14 @@ package com.github.freva.asciitable;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -376,7 +384,24 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void tableWithParagraphsClipRightOverflow() {
+    public void tableWithParagraphsClipRightOverflow() throws IOException {
+try (OutputStream fos = Files.newOutputStream(Paths.get("table.txt"))) {
+    AsciiTable.builder()
+            .lineSeparator("\r\n")
+            .border(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER)
+            .data(planets, Arrays.asList(
+                    new Column().with(planet -> Integer.toString(planet.num)),
+                    new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
+                    new Column().header("Diameter").headerAlign(RIGHT).dataAlign(CENTER).footerAlign(CENTER)
+                            .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                            .with(planet -> String.format("%.03f", planet.diameter)),
+                    new Column().header("Mass").headerAlign(RIGHT).dataAlign(LEFT)
+                            .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                            .with(planet -> String.format("%.02f", planet.mass)),
+                    new Column().header("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)))
+            .writeTo(fos);
+}
+
         assertParagraphs(OverflowBehaviour.CLIP_RIGHT,
                 "+------------------+------------------------------+",
                 "| Long first heade | An even                      |",
@@ -518,6 +543,31 @@ public class AsciiTableTest {
     }
 
     @Test
+    public void customLineSeparator() {
+        String[][] data = {{"11", "12", "13"}, {"21", "22"}};
+        String expected = "+----+----+----+\n\n" +
+                          "| 11 | 12 | 13 |\n\n" +
+                          "+----+----+----+\n\n" +
+                          "| 21 | 22 |    |\n\n" +
+                          "+----+----+----+";
+        assertEquals(expected, AsciiTable.builder().data(data).lineSeparator("\n\n").asString());
+    }
+
+    @Test
+    public void writesToOutputStream() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        String[][] data = {{"11", "12", "13"}, {"21", "22"}};
+        AsciiTable.builder().data(data).writeTo(baos);
+        String expected = String.join(System.lineSeparator(),
+                "+----+----+----+",
+                "| 11 | 12 | 13 |",
+                "+----+----+----+",
+                "| 21 | 22 |    |",
+                "+----+----+----+");
+        assertEquals(expected, baos.toString());
+    }
+
+    @Test
     public void objectDataArray() {
         Object[][] data = {{"String", 123, Instant.ofEpochSecond(1621152246)}};
         String actual = AsciiTable.getTable(data);
@@ -560,7 +610,7 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void justify() {
+    public void justify() throws IOException {
         String string = "test";
         String[] expected = {string + "          ", "     " + string + "     ", "          " + string};
         String[] expectedWithPadding = {"   " + string + "       ", "     " + string + "     ", "       " + string + "   "};
@@ -589,10 +639,12 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
-    private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) {
-        StringBuilder sb = new StringBuilder();
-        AsciiTable.appendJustified(sb, str, align, length, minPadding);
-        assertEquals(expected, sb.toString());
+    private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStreamWriter osw = new OutputStreamWriter(baos);
+        AsciiTable.writeJustified(osw, str, align, length, minPadding);
+        osw.flush();
+        assertEquals(expected, baos.toString());
     }
 
     private static class Planet {
