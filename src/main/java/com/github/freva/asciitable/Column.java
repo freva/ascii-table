@@ -11,19 +11,20 @@ public class Column {
     private int minWidth;
     private int maxWidth;
     private OverflowBehaviour overflowBehaviour;
+    private boolean visible;
 
     public Column() {
-        this(null, null, HorizontalAlign.LEFT, HorizontalAlign.RIGHT, HorizontalAlign.LEFT, 0, 80, OverflowBehaviour.NEWLINE);
+        this(null, null, HorizontalAlign.LEFT, HorizontalAlign.RIGHT, HorizontalAlign.LEFT, 0, 80, OverflowBehaviour.NEWLINE, true);
     }
 
     @Deprecated
     public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
                   HorizontalAlign footerAlign, int maxWidth) {
-        this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth, OverflowBehaviour.NEWLINE);
+        this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth, OverflowBehaviour.NEWLINE, true);
     }
 
-    public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
-                  HorizontalAlign footerAlign, int minWidth, int maxWidth, OverflowBehaviour overflowBehaviour) {
+    Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
+           HorizontalAlign footerAlign, int minWidth, int maxWidth, OverflowBehaviour overflowBehaviour, boolean visible) {
         this.header = header;
         this.footer = footer;
         this.headerAlign = headerAlign;
@@ -32,6 +33,7 @@ public class Column {
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
         this.overflowBehaviour = overflowBehaviour;
+        this.visible = visible;
     }
 
     public String getHeader() {
@@ -78,6 +80,10 @@ public class Column {
 
     public int getFooterWidth() {
         return footer != null ? footer.length() : 0;
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
 
@@ -130,6 +136,12 @@ public class Column {
     /** Use {@link Column#maxWidth(int)} instead */
     @Deprecated
     public Column maxColumnWidth(int maxWidth) { return maxWidth(maxWidth); }
+
+    /** Sets whether this column should be rendered. Default is true */
+    public Column visible(boolean visible) {
+        this.visible = visible;
+        return this;
+    }
 
     public <T> ColumnData<T> with(Function<T, String> getter) {
         return new ColumnData<T>(this, getter);

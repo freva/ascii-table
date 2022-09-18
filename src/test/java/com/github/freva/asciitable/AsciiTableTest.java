@@ -3,19 +3,15 @@ package com.github.freva.asciitable;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static com.github.freva.asciitable.HorizontalAlign.*;
 import static org.junit.Assert.assertEquals;
@@ -385,23 +381,6 @@ public class AsciiTableTest {
 
     @Test
     public void tableWithParagraphsClipRightOverflow() throws IOException {
-try (OutputStream fos = Files.newOutputStream(Paths.get("table.txt"))) {
-    AsciiTable.builder()
-            .lineSeparator("\r\n")
-            .border(AsciiTable.BASIC_ASCII_NO_OUTSIDE_BORDER)
-            .data(planets, Arrays.asList(
-                    new Column().with(planet -> Integer.toString(planet.num)),
-                    new Column().header("Name").footer("Average").headerAlign(CENTER).dataAlign(RIGHT).with(planet -> planet.name),
-                    new Column().header("Diameter").headerAlign(RIGHT).dataAlign(CENTER).footerAlign(CENTER)
-                            .footer(String.format("%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
-                            .with(planet -> String.format("%.03f", planet.diameter)),
-                    new Column().header("Mass").headerAlign(RIGHT).dataAlign(LEFT)
-                            .footer(String.format("%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
-                            .with(planet -> String.format("%.02f", planet.mass)),
-                    new Column().header("Atmosphere").headerAlign(LEFT).dataAlign(CENTER).with(planet -> planet.atmosphere)))
-            .writeTo(fos);
-}
-
         assertParagraphs(OverflowBehaviour.CLIP_RIGHT,
                 "+------------------+------------------------------+",
                 "| Long first heade | An even                      |",
@@ -455,6 +434,24 @@ try (OutputStream fos = Files.newOutputStream(Paths.get("table.txt"))) {
                 "+------------------+------------------------------+",
                 "| Nullam ante erat | Nam sed convallis purus arcu |",
                 "+------------------+------------------------------+");
+    }
+
+    @Test
+    public void invisibleColumns() {
+        String[][] data = {{"11", "12", "13", "14"}, {"21", "22"}};
+        BiConsumer<Boolean[], String[]> asserter = (visibleColumns, expectedRows) -> {
+            Column[] columns = Arrays.stream(visibleColumns).map(visible -> new Column().visible(visible)).toArray(Column[]::new);
+            assertEquals(String.join(System.lineSeparator(), expectedRows), AsciiTable.getTable(AsciiTable.NO_BORDERS, columns, data));
+        };
+
+        asserter.accept(new Boolean[]{true, false}, new String[]{" 11  13  14 ", " 21         "});
+        asserter.accept(new Boolean[]{true, false, true}, new String[]{" 11  13  14 ", " 21         "});
+        asserter.accept(new Boolean[]{true, false, true, false}, new String[]{" 11  13 ", " 21     "});
+        asserter.accept(new Boolean[]{false, false, true, false}, new String[]{" 13 ", "    "});
+        asserter.accept(new Boolean[]{}, new String[]{" 11  12  13  14 ", " 21  22         "});
+        asserter.accept(new Boolean[]{true, true, true, true}, new String[]{" 11  12  13  14 ", " 21  22         "});
+        asserter.accept(new Boolean[]{true, true, true, true, false}, new String[]{" 11  12  13  14 ", " 21  22         "});
+        asserter.accept(new Boolean[]{true, true, true, true, true}, new String[]{" 11  12  13  14   ", " 21  22           "});
     }
 
     @Test
