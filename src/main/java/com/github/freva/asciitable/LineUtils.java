@@ -27,6 +27,7 @@ public class LineUtils {
     private static class LineIterator implements Iterator<String> {
         private final String str;
         private int position = 0;
+        private boolean newlineLast = true;
 
         private LineIterator(String str) {
             this.str = str;
@@ -34,7 +35,7 @@ public class LineUtils {
 
         @Override
         public boolean hasNext() {
-            return position < str.length();
+            return newlineLast || position < str.length();
         }
 
         @Override
@@ -44,10 +45,15 @@ public class LineUtils {
         }
 
         public int getLineEndPositionAndAdvanceToNextLine() {
+            newlineLast = false;
             for (; position < str.length(); position++) {
                 char ch = str.charAt(position);
-                if (ch == '\n') return position++;
+                if (ch == '\n') {
+                    newlineLast = true;
+                    return position++;
+                }
                 if (ch == '\r') {
+                    newlineLast = true;
                     if (position + 1 == str.length() || str.charAt(position + 1) != '\n') return position++;
                     position += 2;
                     return position - 2;
