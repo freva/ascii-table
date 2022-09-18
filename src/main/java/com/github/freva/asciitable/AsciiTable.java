@@ -37,10 +37,11 @@ public class AsciiTable {
         if (border.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
-        String[][] stringData = objectArrayToString(data);
-        int numColumns = getNumColumns(rawColumns, stringData);
+        String[][] stringData = objectArrayToString(rawColumns, data);
+        int numColumns = getNumColumns(rawColumns, data);
         Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
+                .filter(Column::isVisible)
                 .toArray(Column[]::new);
 
         writeTable(osw, lineSeparator, border, columns, stringData);
@@ -160,7 +161,7 @@ public class AsciiTable {
     }
 
     /** Returns maximum number of columns between the header or any of the data rows */
-    private static int getNumColumns(Column[] columns, String[][] data) {
+    private static int getNumColumns(Column[] columns, Object[][] data) {
         return Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
                 .reduce(columns.length, Math::max);
@@ -233,13 +234,20 @@ public class AsciiTable {
         for (int i = 0; i < num; i++) osw.append(c);
     }
 
-    private static String[][] objectArrayToString(Object[][] array) {
-        if (array instanceof String[][]) return (String[][]) array;
+    private static String[][] objectArrayToString(Column[] columns, Object[][] array) {
+        int[] numInvisible = new int[Math.max(1, columns.length)];
+        for (int i = 0; i < columns.length; i++)
+            numInvisible[i] = (i == 0 ? 0 : numInvisible[i - 1]) + (columns[i].isVisible() ? 0 : 1);
+
+        if (numInvisible[numInvisible.length - 1] == 0 && array instanceof String[][])
+            return (String[][]) array;
+
         String[][] stringArray = new String[array.length][];
         for (int i = 0; i < stringArray.length; i++) {
-            stringArray[i] = new String[array[i].length];
-            for (int j = 0; j < array[i].length; j++) {
-                stringArray[i][j] = array[i][j] == null ? null : array[i][j].toString();
+            stringArray[i] = new String[array[i].length - numInvisible[Math.min(numInvisible.length, array[i].length) - 1]];
+            for (int j = 0, k = 0; k < stringArray[i].length; j++) {
+                if (j < columns.length && !columns[j].isVisible()) continue;
+                stringArray[i][k++] = array[i][j] == null ? null : array[i][j].toString();
             }
         }
         return stringArray;
