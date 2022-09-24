@@ -587,23 +587,27 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void calculatesCorrectColumnWidthWithLineBreakInHeaderAndFooter() {
+        String actual = AsciiTable.getTable(new String[]{"Multiline\nHeader"}, new String[]{"Multiline\nFooter"}, new String[][]{{"data"}});
+        String expected = String.join(System.lineSeparator(),
+                "+-----------+",
+                "| Multiline |",
+                "| Header    |",
+                "+-----------+",
+                "|      data |",
+                "+-----------+",
+                "| Multiline |",
+                "| Footer    |",
+                "+-----------+");
+        assertEquals(expected, actual);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void validateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
         String[][] data = {{"11", "12", "13"}, {"21", "22"}, {"31", "32", "33", "34"}};
         AsciiTable.getTable(new Character[10], headers, null, data);
-    }
-
-    @Test
-    public void textSplitting() {
-        String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pretium eu dolor sodales rutrum. " +
-                "Also here is a very long link: http://www.example.tld/some/resource/file.ext a few final words";
-        List<String> expected = Arrays.asList(
-                "Lorem ipsum", "dolor sit", "amet,", "consectetur", "adipiscing", "elit. Nam", "pretium eu", "dolor",
-                "sodales", "rutrum. Also", "here is a", "very long", "link:", "http://www.e", "xample.tld/s",
-                "ome/resource", "/file.ext a", "few final", "words");
-
-        assertEquals(expected, AsciiTable.splitTextIntoLinesOfMaxLength(str, 12));
     }
 
     @Test

@@ -74,14 +74,6 @@ public class Column {
         return overflowBehaviour;
     }
 
-    public int getHeaderWidth() {
-        return header != null ? header.length() : 0;
-    }
-
-    public int getFooterWidth() {
-        return footer != null ? footer.length() : 0;
-    }
-
     public boolean isVisible() {
         return visible;
     }
