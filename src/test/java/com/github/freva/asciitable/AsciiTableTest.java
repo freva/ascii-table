@@ -587,6 +587,22 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void calculatesCorrectColumnWidthWithLineBreakInHeaderAndFooter() {
+        String actual = AsciiTable.getTable(new String[]{"Multiline\nHeader"}, new String[]{"Multiline\nFooter"}, new String[][]{{"data"}});
+        String expected = String.join(System.lineSeparator(),
+                "+-----------+",
+                "| Multiline |",
+                "| Header    |",
+                "+-----------+",
+                "|      data |",
+                "+-----------+",
+                "| Multiline |",
+                "| Footer    |",
+                "+-----------+");
+        assertEquals(expected, actual);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void validateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};

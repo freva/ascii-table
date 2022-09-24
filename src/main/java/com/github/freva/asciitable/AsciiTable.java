@@ -149,12 +149,17 @@ public class AsciiTable {
 
         for (String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                result[col] = Math.max(result[col], dataRow[col] == null ? 0 : LineUtils.maxLineLength(dataRow[col]));
+                if (dataRow[col] == null || dataRow[col].length() <= result[col]) continue;
+                result[col] = Math.max(result[col], LineUtils.maxLineLength(dataRow[col]));
             }
         }
 
         for (int col = 0; col < columns.length; col++) {
-            int length = Math.max(Math.max(columns[col].getHeaderWidth(), columns[col].getFooterWidth()), result[col]);
+            int length = result[col];
+            if (columns[col].getHeader() != null && columns[col].getHeader().length() > length)
+                length = Math.max(length, LineUtils.maxLineLength(columns[col].getHeader()));
+            if (columns[col].getFooter() != null && columns[col].getFooter().length() > length)
+                length = Math.max(length, LineUtils.maxLineLength(columns[col].getFooter()));
             result[col] = Math.max(Math.min(columns[col].getMaxWidth(), length + 2 * PADDING), columns[col].getMinWidth());
         }
         return result;
