@@ -611,18 +611,6 @@ public class AsciiTableTest {
     }
 
     @Test
-    public void textSplitting() {
-        String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pretium eu dolor sodales rutrum. " +
-                "Also here is a very long link: http://www.example.tld/some/resource/file.ext a few final words";
-        List<String> expected = Arrays.asList(
-                "Lorem ipsum", "dolor sit", "amet,", "consectetur", "adipiscing", "elit. Nam", "pretium eu", "dolor",
-                "sodales", "rutrum. Also", "here is a", "very long", "link:", "http://www.e", "xample.tld/s",
-                "ome/resource", "/file.ext a", "few final", "words");
-
-        assertEquals(expected, AsciiTable.splitTextIntoLinesOfMaxLength(str, 12));
-    }
-
-    @Test
     public void justify() throws IOException {
         String string = "test";
         String[] expected = {string + "          ", "     " + string + "     ", "          " + string};

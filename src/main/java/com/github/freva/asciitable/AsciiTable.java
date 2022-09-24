@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -121,7 +120,7 @@ public class AsciiTable {
                                     case ELLIPSIS:
                                     case ELLIPSIS_RIGHT: return Stream.of(paragraph.substring(0, limit - 1) + ELLIPSIS);
                                     default:
-                                    case NEWLINE: return splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
+                                    case NEWLINE: return LineUtils.splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
                                 }
                             })
                             .collect(Collectors.toList());
@@ -175,42 +174,6 @@ public class AsciiTable {
     /** Returns the width of each line in resulting table not counting the line break character(s) */
     private static int getTableWidth(int[] colWidths) {
         return Arrays.stream(colWidths).sum() + PADDING * (colWidths.length + 1) - 1;
-    }
-
-    /**
-     * Splits a string into multiple strings each of which length is <= maxCharInLine. The splitting is done by
-     * space character if possible, otherwise a word is broken at exactly maxCharInLine.
-     * This method preserves all spaces except the one it splits on, for example:
-     * string "here is    a  strange string" split on length 8 gives: ["here is ", "  a ", "strange", "string"]
-     *
-     * @param str String to split
-     * @param maxCharInLine Max length of each split
-     * @return List of string that form original string, but each string is as-short-or-shorter than maxCharInLine
-     */
-    static List<String> splitTextIntoLinesOfMaxLength(String str, int maxCharInLine) {
-        List<String> lines = new LinkedList<>();
-        StringBuilder line = new StringBuilder(maxCharInLine);
-        int offset = 0;
-
-        while (offset < str.length() && maxCharInLine < str.length() - offset) {
-            int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
-
-            if (offset < spaceToWrapAt) {
-                line.append(str, offset, spaceToWrapAt);
-                offset = spaceToWrapAt + 1;
-            } else {
-                line.append(str, offset, offset + maxCharInLine);
-                offset += maxCharInLine;
-            }
-
-            lines.add(line.toString());
-            line.setLength(0);
-        }
-
-        line.append(str.substring(offset));
-        lines.add(line.toString());
-
-        return lines;
     }
 
     /**

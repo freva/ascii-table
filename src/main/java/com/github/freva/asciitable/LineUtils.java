@@ -1,6 +1,8 @@
 package com.github.freva.asciitable;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -22,6 +24,42 @@ public class LineUtils {
             max = Math.max(max, lineIterator.getLineEndPositionAndAdvanceToNextLine() - start);
         }
         return max;
+    }
+
+    /**
+     * Splits a string into multiple strings each of which length is <= maxCharInLine. The splitting is done by
+     * space character if possible, otherwise a word is broken at exactly maxCharInLine.
+     * This method preserves all spaces except the one it splits on, for example:
+     * string "here is    a  strange string" split on length 8 gives: ["here is ", "  a ", "strange", "string"]
+     *
+     * @param str String to split
+     * @param maxCharInLine Max length of each split
+     * @return List of string that form original string, but each string is as-short-or-shorter than maxCharInLine
+     */
+    static List<String> splitTextIntoLinesOfMaxLength(String str, int maxCharInLine) {
+        List<String> lines = new LinkedList<>();
+        StringBuilder line = new StringBuilder(maxCharInLine);
+        int offset = 0;
+
+        while (offset < str.length() && maxCharInLine < str.length() - offset) {
+            int spaceToWrapAt = str.lastIndexOf(' ', offset + maxCharInLine);
+
+            if (offset < spaceToWrapAt) {
+                line.append(str, offset, spaceToWrapAt);
+                offset = spaceToWrapAt + 1;
+            } else {
+                line.append(str, offset, offset + maxCharInLine);
+                offset += maxCharInLine;
+            }
+
+            lines.add(line.toString());
+            line.setLength(0);
+        }
+
+        line.append(str.substring(offset));
+        lines.add(line.toString());
+
+        return lines;
     }
 
     private static class LineIterator implements Iterator<String> {
