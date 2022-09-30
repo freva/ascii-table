@@ -7,12 +7,14 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class AsciiTableBuilder {
 
     private String lineSeparator = System.lineSeparator();
     private Character[] border = AsciiTable.BASIC_ASCII;
+    private Styler styler;
     private String[] header;
     private String[] footer;
     private Column[] columns;
@@ -20,13 +22,19 @@ public class AsciiTableBuilder {
 
     /** Set the line separator to use between table rows. Default is {@link System#lineSeparator()}. */
     public AsciiTableBuilder lineSeparator(String lineSeparator) {
-        this.lineSeparator = lineSeparator;
+        this.lineSeparator = Objects.requireNonNull(lineSeparator, "line separator cannot be null");
         return this;
     }
 
     /** Set the table border style. Default is {@link AsciiTable#BASIC_ASCII}. */
     public AsciiTableBuilder border(Character[] border) {
-        this.border = border;
+        this.border = Objects.requireNonNull(border, "border cannot be null");
+        return this;
+    }
+
+    /** Set the table styler, default is noop */
+    public AsciiTableBuilder styler(Styler styler) {
+        this.styler = Objects.requireNonNull(styler, "styler cannot be null");
         return this;
     }
 
@@ -93,7 +101,7 @@ public class AsciiTableBuilder {
 
         try {
             OutputStreamWriter osw = new OutputStreamWriter(os);
-            AsciiTable.writeTable(osw, lineSeparator, border, columns, data);
+            AsciiTable.writeTable(osw, lineSeparator, border, columns, data, styler);
             osw.flush();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static com.github.freva.asciitable.HorizontalAlign.*;
 import static org.junit.Assert.assertEquals;
@@ -603,6 +603,51 @@ public class AsciiTableTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void styler() {
+        String[] headers = {"First", "Second", "Third"};
+        String[][] data = {{"11", "12", "13"}, {"21", "22", "23"}, {"31", "32", "33"}};
+
+        final String RESET = "\u001B[m";
+        final String RED = "\u001B[31m";
+        final String GREEN = "\u001B[32m";
+        final String YELLOW = "\u001B[33m";
+        final String BLUE = "\u001B[34m";
+        Styler styler = new Styler() {
+            @Override
+            public List<String> styleCell(Column column, int row, int col, List<String> data) {
+                String color = row % 2 == 0 ? (col % 2 == 0 ? RED : BLUE) : (col % 2 == 0 ? BLUE : RED);
+                return data.stream().map(line -> color + line + RESET).collect(Collectors.toList());
+            }
+
+            @Override
+            public List<String> styleHeader(Column column, int col, List<String> data) {
+                String color = col % 2 == 0 ? GREEN : YELLOW;
+                return data.stream().map(line -> color + line + RESET).collect(Collectors.toList());
+            }
+
+            @Override
+            public List<String> styleFooter(Column column, int col, List<String> data) {
+                String color = col % 2 == 0 ? YELLOW : GREEN;
+                return data.stream().map(line -> color + line + RESET).collect(Collectors.toList());
+            }
+        };
+
+        String actual = AsciiTable.builder().styler(styler).header(headers).footer(headers).data(data).asString();
+        assertEquals(String.format(
+                "+-------+--------+-------+%1$s" +
+                "|%2$s First %6$s|%3$s Second %6$s|%2$s Third %6$s|%1$s" +
+                "+-------+--------+-------+%1$s" +
+                "|%5$s    11 %6$s|%4$s     12 %6$s|%5$s    13 %6$s|%1$s" +
+                "+-------+--------+-------+\n" +
+                "|%4$s    21 %6$s|%5$s     22 %6$s|%4$s    23 %6$s|%1$s" +
+                "+-------+--------+-------+%1$s" +
+                "|%5$s    31 %6$s|%4$s     32 %6$s|%5$s    33 %6$s|%1$s" +
+                "+-------+--------+-------+%1$s" +
+                "|%3$s First %6$s|%2$s Second %6$s|%3$s Third %6$s|%1$s" +
+                "+-------+--------+-------+", System.lineSeparator(), GREEN, YELLOW, BLUE, RED, RESET), actual);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void validateTooFewBorderChars() {
         String[] headers = {"Lorem", "Ipsum", "Dolor", "Sit"};
@@ -641,11 +686,8 @@ public class AsciiTableTest {
     }
 
     private static void assertJustify(String expected, String str, HorizontalAlign align, int length, int minPadding) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(baos);
-        AsciiTable.writeJustified(osw, str, align, length, minPadding);
-        osw.flush();
-        assertEquals(expected, baos.toString());
+        String actual = AsciiTable.justify(str, align, length, minPadding);
+        assertEquals(expected, actual);
     }
 
     private static class Planet {
