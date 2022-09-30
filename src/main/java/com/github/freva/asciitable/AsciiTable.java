@@ -1,11 +1,14 @@
 package com.github.freva.asciitable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,7 +35,7 @@ public class AsciiTable {
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
 
-    static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] rawColumns, Object[][] data) throws IOException {
+    static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] rawColumns, Object[][] data, Styler styler) throws IOException {
         if (border.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
@@ -43,10 +46,10 @@ public class AsciiTable {
                 .filter(Column::isVisible)
                 .toArray(Column[]::new);
 
-        writeTable(osw, lineSeparator, border, columns, stringData);
+        writeTable(osw, lineSeparator, border, columns, stringData, styler);
     }
 
-    private static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] columns, String[][] data) throws IOException {
+    private static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] columns, String[][] data, Styler styler) throws IOException {
         int[] colWidths = getColWidths(columns, data);
         OverflowBehaviour[] overflows = Arrays.stream(columns).map(Column::getOverflowBehaviour).toArray(OverflowBehaviour[]::new);
         boolean insertNewline = writeLine(osw, colWidths, border[0], border[1], border[2], border[3]);
@@ -55,7 +58,8 @@ public class AsciiTable {
             HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
             String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
             if (insertNewline) osw.write(lineSeparator);
-            writeData(osw, colWidths, overflows, aligns, header, border[4], border[5], border[6], lineSeparator);
+            writeData(osw, colWidths, overflows, aligns, header, border[4], border[5], border[6], lineSeparator,
+                    styler == null ? null : (col, rows) -> styler.styleHeader(columns[col], col, rows));
             osw.write(lineSeparator);
             insertNewline = writeLine(osw, colWidths, border[7], border[8], border[9], border[10]);
         }
@@ -63,7 +67,9 @@ public class AsciiTable {
         HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
         for (int i = 0; i < data.length; i++) {
             if (insertNewline) osw.write(lineSeparator);
-            writeData(osw, colWidths, overflows, dataAligns, data[i], border[11], border[12], border[13], lineSeparator);
+            int row = i;
+            writeData(osw, colWidths, overflows, dataAligns, data[i], border[11], border[12], border[13], lineSeparator,
+                    styler == null ? null : (col, rows) -> styler.styleCell(columns[col], row, col, rows));
             if (i < data.length - 1) {
                 osw.write(lineSeparator);
                 insertNewline = writeLine(osw, colWidths, border[14], border[15], border[16], border[17]);
@@ -76,7 +82,8 @@ public class AsciiTable {
             String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
             insertNewline = writeLine(osw, colWidths, border[18], border[19], border[20], border[21]);
             if (insertNewline) osw.write(lineSeparator);
-            writeData(osw, colWidths, overflows, aligns, footer, border[22], border[23], border[24], lineSeparator);
+            writeData(osw, colWidths, overflows, aligns, footer, border[22], border[23], border[24], lineSeparator,
+                    styler == null ? null : (col, rows) -> styler.styleFooter(columns[col], col, rows));
         }
 
         if (border[26] != null) osw.write(lineSeparator);
@@ -103,7 +110,8 @@ public class AsciiTable {
      */
     @SuppressWarnings("deprecated")
     private static void writeData(OutputStreamWriter osw, int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
-                                  String[] contents, Character left, Character columnSeparator, Character right, String lineSeparator) throws IOException {
+                                  String[] contents, Character left, Character columnSeparator, Character right, String lineSeparator,
+                                  BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
                     String text = i < contents.length && contents[i] != null ? contents[i] : "";
@@ -130,11 +138,19 @@ public class AsciiTable {
                 .mapToInt(List::size)
                 .max().orElse(0);
 
+        List<List<String>> justifiedLinesContents = styler == null ? null : IntStream.range(0, colWidths.length)
+                .mapToObj(col -> styler.apply(col, IntStream.range(0, numLines)
+                        .mapToObj(i -> justify(i < linesContents.get(col).size() ? linesContents.get(col).get(i) : "", horizontalAligns[col], colWidths[col], PADDING))
+                        .collect(Collectors.toList())))
+                .collect(Collectors.toList());
+
         for (int line = 0; line < numLines; line++) {
             if (left != null) osw.append(left);
             for (int col = 0; col < colWidths.length; col++) {
-                String item = linesContents.get(col).size() <= line ? "" : linesContents.get(col).get(line);
-                writeJustified(osw, item, horizontalAligns[col], colWidths[col], PADDING);
+                if (justifiedLinesContents == null) {
+                    String item = linesContents.get(col).size() <= line ? "" : linesContents.get(col).get(line);
+                    writeJustified(osw, item, horizontalAligns[col], colWidths[col], PADDING);
+                } else osw.write(justifiedLinesContents.get(col).get(line));
                 if (columnSeparator != null && col != colWidths.length - 1) osw.write(columnSeparator);
             }
             if (right != null) osw.append(right);
@@ -171,9 +187,14 @@ public class AsciiTable {
                 .reduce(columns.length, Math::max);
     }
 
-    /** Returns the width of each line in resulting table not counting the line break character(s) */
-    private static int getTableWidth(int[] colWidths) {
-        return Arrays.stream(colWidths).sum() + PADDING * (colWidths.length + 1) - 1;
+    static String justify(String str, HorizontalAlign align, int length, int minPadding) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
+        try (OutputStreamWriter osw = new OutputStreamWriter(baos)) {
+            writeJustified(osw, str, align, length, minPadding);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return baos.toString();
     }
 
     /**
