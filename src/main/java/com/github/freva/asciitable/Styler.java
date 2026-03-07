@@ -1,5 +1,8 @@
 package com.github.freva.asciitable;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+
 import java.util.List;
 
 /**

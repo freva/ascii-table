@@ -1,8 +1,12 @@
 package com.github.freva.asciitable;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import java.util.function.Function;
 
-public class ColumnData<T> extends Column {
+@NullMarked
+public class ColumnData<T extends @Nullable Object> extends Column {
     private final Function<T, String> getter;
 
     ColumnData(Column column, Function<T, String> getter) {
