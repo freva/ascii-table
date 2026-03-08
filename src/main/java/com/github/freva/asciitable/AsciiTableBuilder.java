@@ -59,12 +59,12 @@ public class AsciiTableBuilder {
         return this;
     }
 
-    public AsciiTableBuilder data(@Nullable Object[][] data) {
+    public AsciiTableBuilder data(@Nullable Object @Nullable[][] data) {
         this.data = data;
         return this;
     }
 
-    public AsciiTableBuilder data(Column[] columns, @Nullable Object[][] data) {
+    public AsciiTableBuilder data(Column[] columns, @Nullable Object @Nullable[][] data) {
         this.columns = columns;
         this.data = data;
         return this;
@@ -72,11 +72,17 @@ public class AsciiTableBuilder {
 
     public <T extends @Nullable Object> AsciiTableBuilder data(Collection<T> objects, List<ColumnData<T>> columns) {
         Column[] rawColumns = columns.toArray(new Column[0]);
-        String[][] data = objects.stream()
-                .map(object ->  columns.stream()
-                        .map(dataColumn ->  dataColumn.getCellValue(object))
-                        .toArray(String[]::new))
-                .toArray(String[][]::new);
+
+        @Nullable String[][] data = new String[objects.size()][];
+        @Nullable String[] current;
+        int i = 0;
+        for(T object: objects){
+            current = new String[columns.size()];
+            for(int j = 0; j < columns.size(); j++){
+                current[j] = columns.get(j).getCellValue(object);
+            }
+            data[i++] = current;
+        }
 
         return data(rawColumns, data);
     }

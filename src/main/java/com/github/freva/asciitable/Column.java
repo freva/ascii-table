@@ -139,7 +139,7 @@ public class Column {
         return this;
     }
 
-    public <T extends @Nullable Object> ColumnData<T> with(Function<T, String> getter) {
+    public <T extends @Nullable Object> ColumnData<T> with(Function<T, @Nullable String> getter) {
         return new ColumnData<T>(this, getter);
     }
 }
