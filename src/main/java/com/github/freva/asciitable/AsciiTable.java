@@ -38,6 +38,39 @@ public class AsciiTable {
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
+    //https://spec.commonmark.org/0.31.2/
+    public static final @Nullable Character[] MARKDOWN = {
+            null, //A
+            null, //B
+            null, //C
+            null, //D
+            '|', //E
+            '|', //F
+            '|', //G
+            '|', //H
+            '-', //I
+            '|', //J
+            '|', //K
+            '|', //L
+            '|', //M
+            '|', //N
+            null, //O
+            null, //P
+            null, //Q
+            null, //R
+            null, //S
+            null, //T
+            null, //U
+            null, //V
+            '|', //W
+            '|', //X
+            '|', //Y
+            null, //Z
+            null, //1
+            null, //2
+            null //3
+    };
+
 
     static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {
         if (border.length != NO_BORDERS.length)
