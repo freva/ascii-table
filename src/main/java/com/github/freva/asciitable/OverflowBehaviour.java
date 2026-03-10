@@ -17,6 +17,12 @@ public enum OverflowBehaviour {
     /** Clip and prepend '…' the from the right when max column width is reached */
     ELLIPSIS_RIGHT,
 
+    /**
+     * Replace the middle of the text with '…' when max width is reached.
+     * Keeps both the beginning and the end visible.
+     * @since 1.10.0
+     */
+    ELLIPSIS_CENTER,
 
     /** Use {@link com.github.freva.asciitable.OverflowBehaviour#CLIP_RIGHT} instead */
     @Deprecated
