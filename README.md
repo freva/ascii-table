@@ -135,29 +135,30 @@ System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP_RIGHT).with(planet -> planet.atmosphere),
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_LEFT).with(planet -> planet.atmosphere),
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_RIGHT).with(planet -> planet.atmosphere))));
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_CENTER).with(planet -> planet.atmosphere))));
 ```
 Prints
 ```
-+------------+------------+------------+------------+------------+
-| Atmosphere | omposition | Atmosphere | …mposition | Atmospher… |
-| Compositio |            |            |            |            |
-| n          |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|    minimal |    minimal |    minimal |    minimal |    minimal |
-+------------+------------+------------+------------+------------+
-|     Carbon | , Nitrogen | Carbon dio | … Nitrogen | Carbon di… |
-|   dioxide, |            |            |            |            |
-|   Nitrogen |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|  Nitrogen, | gen, Argon | Nitrogen,  | …en, Argon | Nitrogen,… |
-|    Oxygen, |            |            |            |            |
-|      Argon |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|     Carbon | gen, Argon | Carbon dio | …en, Argon | Carbon di… |
-|   dioxide, |            |            |            |            |
-|  Nitrogen, |            |            |            |            |
-|      Argon |            |            |            |            |
-+------------+------------+------------+------------+------------+
++------------+------------+------------+------------+------------+------------+
+| Atmosphere | omposition | Atmosphere | …mposition | Atmospher… | Atmos…tion |
+| Compositio |            |            |            |            |            |
+| n          |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|    minimal |    minimal |    minimal |    minimal |    minimal |    minimal |
++------------+------------+------------+------------+------------+------------+
+|     Carbon | , Nitrogen | Carbon dio | … Nitrogen | Carbon di… | Carb…rogen |
+|   dioxide, |            |            |            |            |            |
+|   Nitrogen |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|  Nitrogen, | gen, Argon | Nitrogen,  | …en, Argon | Nitrogen,… | Nitr…Argon |
+|    Oxygen, |            |            |            |            |            |
+|      Argon |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|     Carbon | gen, Argon | Carbon dio | …en, Argon | Carbon di… | Carb…Argon |
+|   dioxide, |            |            |            |            |            |
+|  Nitrogen, |            |            |            |            |            |
+|      Argon |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
 ```
 
 ## Max table width

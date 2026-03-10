@@ -439,6 +439,25 @@ public class AsciiTableTest {
     }
 
     @Test
+    public void tableWithParagraphsEllipsisCenterOverflow() {
+        assertParagraphs(OverflowBehaviour.ELLIPSIS_CENTER,
+                "+------------------+------------------------------+",
+                "| Long fi…t header | An even                      |",
+                "|                  | longer second…th line breaks |",
+                "+------------------+------------------------------+",
+                "| Ut sagi…acilisis | Duis nec urna… enim pretium. |",
+                "|                  | Integer hendr…udin eleifend. |",
+                "|                  | Cras condimen…attis posuere. |",
+                "+------------------+------------------------------+",
+                "| Nulla a…lerisque | Nullam vitae …modo ultrices. |",
+                "|                  | Fusce hendrer…ibh a finibus. |",
+                "|                  | In faucibus a…odo facilisis. |",
+                "+------------------+------------------------------+",
+                "| Nullam ante erat | Nam sed convallis purus arcu |",
+                "+------------------+------------------------------+");
+    }
+
+    @Test
     public void invisibleColumns() {
         String[][] data = {{"11", "12", "13", "14"}, {"21", "22"}};
         BiConsumer<Boolean[], String[]> asserter = (visibleColumns, expectedRows) -> {
