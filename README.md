@@ -363,3 +363,39 @@ STTTUTTTTTTTTTUTTTTTTTTTTUTTTTTTUTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTV
 W   X Average X  0.716   X 0.50 X                                 Y
 Z111211111111121111111111211111121111111111111111111111111111111113
 ```
+
+This snippet can be used as a starting point for creating a new border style:
+```java
+public static final Character[] CUSTOM = {
+            null, //A
+            null, //B
+            null, //C
+            null, //D
+            null, //E
+            null, //F
+            null, //G
+            null, //H
+            null, //I
+            null, //J
+            null, //K
+            null, //L
+            null, //M
+            null, //N
+            null, //O
+            null, //P
+            null, //Q
+            null, //R
+            null, //S
+            null, //T
+            null, //U
+            null, //V
+            null, //W
+            null, //X
+            null, //Y
+            null, //Z
+            null, //1
+            null, //2
+            null  //3
+    };
+```
+
