@@ -64,7 +64,7 @@ public class AsciiTableBuilder {
         return this;
     }
 
-    public AsciiTableBuilder data(Column[] columns, @Nullable Object @Nullable[][] data) {
+    public AsciiTableBuilder data(Column @Nullable[] columns, @Nullable Object @Nullable[][] data) {
         this.columns = columns;
         this.data = data;
         return this;

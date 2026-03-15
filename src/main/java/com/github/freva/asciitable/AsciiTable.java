@@ -235,7 +235,7 @@ public class AsciiTable {
     }
 
     /** Returns maximum number of columns between the header or any of the data rows */
-    private static int getNumColumns(Column[] columns, @Nullable Object[][] data) {
+    private static int getNumColumns(@Nullable Column[] columns, @Nullable Object[][] data) {
         return Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
                 .reduce(columns.length, Math::max);
@@ -277,7 +277,7 @@ public class AsciiTable {
         for (int i = 0; i < num; i++) osw.append(c);
     }
 
-    private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object[][] array) {
+    private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object [][] array) {
         int[] numInvisible = new int[Math.max(1, columns.length)];
         for (int i = 0; i < columns.length; i++)
             numInvisible[i] = (i == 0 ? 0 : numInvisible[i - 1]) + (columns[i].isVisible() ? 0 : 1);
@@ -306,19 +306,19 @@ public class AsciiTable {
         return builder().data(objects, columns).border(border).asString();
     }
 
-    public static String getTable(@Nullable Object[][] data) {
+    public static String getTable(@Nullable Object @Nullable[][] data) {
         return builder().data(data).asString();
     }
 
-    public static String getTable(@Nullable String @Nullable[] header, @Nullable Object[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable Object @Nullable[][] data) {
         return builder().header(header).data(data).asString();
     }
 
-    public static String getTable(@Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
         return builder().header(header).footer(footer).data(data).asString();
     }
 
-    public static String getTable(@Nullable Character[] border, @Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object[][] data) {
+    public static String getTable(@Nullable Character[] border, @Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
         return builder().header(header).footer(footer).border(border).data(data).asString();
     }
 
@@ -326,7 +326,7 @@ public class AsciiTable {
         return builder().data(columns, data).asString();
     }
 
-    public static String getTable(@Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data) {
+    public static String getTable(@Nullable Character[] border, Column @Nullable[] rawColumns, @Nullable Object @Nullable[][] data) {
         return builder().data(rawColumns, data).border(border).asString();
     }
 
