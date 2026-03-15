@@ -1,5 +1,8 @@
 package com.github.freva.asciitable;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -13,29 +16,30 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@NullMarked
 public class AsciiTable {
     private static final int PADDING = 1;
     private static final char ELLIPSIS = '…';
 
-    public static final Character[] NO_BORDERS = new Character[29];
+    public static final @Nullable Character[] NO_BORDERS = new Character[29];
 
     public static final Character[] BASIC_ASCII = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
             '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
-    public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
+    public static final @Nullable Character[] BASIC_ASCII_NO_DATA_SEPARATORS = {'+', '-', '+', '+', '|', '|', '|', '+', '-',
             '+', '+', '|', '|', '|', null, null, null, null, '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
-    public static final Character[] BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER = {null, null, null, null, null,
+    public static final @Nullable Character[] BASIC_ASCII_NO_DATA_SEPARATORS_NO_OUTSIDE_BORDER = {null, null, null, null, null,
             '|', null, null, '-', '+', null, null, '|', null, null, null, null, null, null, '-', '+', null, null, '|', null, null, null, null, null};
 
-    public static final Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
+    public static final @Nullable Character[] BASIC_ASCII_NO_OUTSIDE_BORDER = {null, null, null, null, null, '|', null,
             null, '-', '+', null, null, '|', null, null, '-', '+', null, null, '-', '+', null, null, '|', null, null, null, null, null};
 
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
 
-    static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] rawColumns, Object[][] data, Styler styler, Integer maxTableWidth) throws IOException {
+    static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {
         if (border.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
@@ -49,14 +53,14 @@ public class AsciiTable {
         writeTable(osw, lineSeparator, border, columns, stringData, styler, maxTableWidth);
     }
 
-    private static void writeTable(OutputStreamWriter osw, String lineSeparator, Character[] border, Column[] columns, String[][] data, Styler styler, Integer maxTableWidth) throws IOException {
+    private static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] columns, @Nullable String[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {
         int[] colWidths = getColWidths(columns, data, border, maxTableWidth);
         OverflowBehaviour[] overflows = Arrays.stream(columns).map(Column::getOverflowBehaviour).toArray(OverflowBehaviour[]::new);
         boolean insertNewline = writeLine(osw, colWidths, border[0], border[1], border[2], border[3]);
 
         if (Arrays.stream(columns).map(Column::getHeader).anyMatch(Objects::nonNull)) {
             HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getHeaderAlign).toArray(HorizontalAlign[]::new);
-            String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
+            @Nullable String[] header = Arrays.stream(columns).map(Column::getHeader).toArray(String[]::new);
             if (insertNewline) osw.write(lineSeparator);
             writeData(osw, colWidths, overflows, aligns, header, border[4], border[5], border[6], lineSeparator,
                     styler == null ? null : (col, rows) -> styler.styleHeader(columns[col], col, rows));
@@ -79,7 +83,7 @@ public class AsciiTable {
         if (Arrays.stream(columns).map(Column::getFooter).anyMatch(Objects::nonNull)) {
             osw.write(lineSeparator);
             HorizontalAlign[] aligns = Arrays.stream(columns).map(Column::getFooterAlign).toArray(HorizontalAlign[]::new);
-            String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
+            @Nullable String[] footer = Arrays.stream(columns).map(Column::getFooter).toArray(String[]::new);
             insertNewline = writeLine(osw, colWidths, border[18], border[19], border[20], border[21]);
             if (insertNewline) osw.write(lineSeparator);
             writeData(osw, colWidths, overflows, aligns, footer, border[22], border[23], border[24], lineSeparator,
@@ -91,7 +95,7 @@ public class AsciiTable {
     }
 
     /** Returns a line/border row in the resulting table */
-    private static boolean writeLine(OutputStreamWriter osw, int[] colWidths, Character left, Character middle, Character columnSeparator, Character right) throws IOException {
+    private static boolean writeLine(OutputStreamWriter osw, int[] colWidths, @Nullable Character left, @Nullable Character middle, @Nullable Character columnSeparator, @Nullable Character right) throws IOException {
         if (middle == null) return false;
         if (left != null) osw.append(left);
         for (int col = 0; col < colWidths.length; col++) {
@@ -110,11 +114,12 @@ public class AsciiTable {
      */
     @SuppressWarnings("deprecated")
     private static void writeData(OutputStreamWriter osw, int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
-                                  String[] contents, Character left, Character columnSeparator, Character right, String lineSeparator,
-                                  BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
+                                   @Nullable String[] contents, @Nullable Character left, @Nullable Character columnSeparator, @Nullable Character right, String lineSeparator,
+                                  @Nullable BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
-                    String text = i < contents.length && contents[i] != null ? contents[i] : "";
+                    String text = i < contents.length? contents[i]: "";
+                           text = text != null? text: "";
                     return LineUtils.lines(text)
                             .flatMap(paragraph -> {
                                 int limit = colWidths[i] - 2 * PADDING;
@@ -164,22 +169,27 @@ public class AsciiTable {
     }
 
     /** Returns the width of each column in the resulting table */
-    static int[] getColWidths(Column[] columns, String[][] data, Character[] border, Integer maxTableWidth) {
+    static int[] getColWidths(Column[] columns, @Nullable String[][] data, @Nullable Character[] border, @Nullable Integer maxTableWidth) {
         int[] result = new int[columns.length];
+        String current;
 
-        for (String[] dataRow : data) {
+        for (@Nullable String[] dataRow : data) {
             for (int col = 0; col < dataRow.length; col++) {
-                if (dataRow[col] == null || dataRow[col].length() <= result[col]) continue;
-                result[col] = Math.max(result[col], LineUtils.maxLineLength(dataRow[col]));
+                current = dataRow[col];
+                if (current == null || current.length() <= result[col]) continue;
+                result[col] = Math.max(result[col], LineUtils.maxLineLength(current));
             }
         }
 
         for (int col = 0; col < columns.length; col++) {
             int length = result[col];
-            if (columns[col].getHeader() != null && columns[col].getHeader().length() > length)
-                length = Math.max(length, LineUtils.maxLineLength(columns[col].getHeader()));
-            if (columns[col].getFooter() != null && columns[col].getFooter().length() > length)
-                length = Math.max(length, LineUtils.maxLineLength(columns[col].getFooter()));
+            current = columns[col].getHeader();
+            if (current != null && current.length() > length)
+                length = Math.max(length, LineUtils.maxLineLength(current));
+
+            current = columns[col].getFooter();
+            if (current != null && current.length() > length)
+                length = Math.max(length, LineUtils.maxLineLength(current));
             result[col] = Math.max(Math.min(columns[col].getMaxWidth(), length + 2 * PADDING), columns[col].getMinWidth());
         }
 
@@ -226,7 +236,7 @@ public class AsciiTable {
     }
 
     /** Returns maximum number of columns between the header or any of the data rows */
-    private static int getNumColumns(Column[] columns, Object[][] data) {
+    private static int getNumColumns(@Nullable Column[] columns, @Nullable Object[][] data) {
         return Arrays.stream(data)
                 .mapToInt(cols -> cols.length)
                 .reduce(columns.length, Math::max);
@@ -268,7 +278,7 @@ public class AsciiTable {
         for (int i = 0; i < num; i++) osw.append(c);
     }
 
-    private static String[][] objectArrayToString(Column[] columns, Object[][] array) {
+    private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object [][] array) {
         int[] numInvisible = new int[Math.max(1, columns.length)];
         for (int i = 0; i < columns.length; i++)
             numInvisible[i] = (i == 0 ? 0 : numInvisible[i - 1]) + (columns[i].isVisible() ? 0 : 1);
@@ -276,7 +286,7 @@ public class AsciiTable {
         if (numInvisible[numInvisible.length - 1] == 0 && array instanceof String[][])
             return (String[][]) array;
 
-        String[][] stringArray = new String[array.length][];
+        @Nullable String[][] stringArray = new String[array.length][];
         for (int i = 0; i < stringArray.length; i++) {
             stringArray[i] = new String[array[i].length - numInvisible[Math.min(numInvisible.length, array[i].length) - 1]];
             for (int j = 0, k = 0; k < stringArray[i].length; j++) {
@@ -289,35 +299,35 @@ public class AsciiTable {
 
     // ===== Public API =====
 
-    public static <T> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
+    public static <T extends @Nullable Object> String getTable(Collection<T> objects, List<ColumnData<T>> columns) {
         return builder().data(objects, columns).asString();
     }
 
-    public static <T> String getTable(Character[] border, Collection<T> objects, List<ColumnData<T>> columns) {
+    public static <T extends @Nullable Object> String getTable(@Nullable Character[] border, Collection<T> objects, List<ColumnData<T>> columns) {
         return builder().data(objects, columns).border(border).asString();
     }
 
-    public static String getTable(Object[][] data) {
+    public static String getTable(@Nullable Object @Nullable[][] data) {
         return builder().data(data).asString();
     }
 
-    public static String getTable(String[] header, Object[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable Object @Nullable[][] data) {
         return builder().header(header).data(data).asString();
     }
 
-    public static String getTable(String[] header, String[] footer, Object[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
         return builder().header(header).footer(footer).data(data).asString();
     }
 
-    public static String getTable(Character[] border, String[] header, String[] footer, Object[][] data) {
+    public static String getTable(@Nullable Character[] border, @Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
         return builder().header(header).footer(footer).border(border).data(data).asString();
     }
 
-    public static String getTable(Column[] columns, Object[][] data) {
+    public static String getTable(Column[] columns, @Nullable Object[][] data) {
         return builder().data(columns, data).asString();
     }
 
-    public static String getTable(Character[] border, Column[] rawColumns, Object[][] data) {
+    public static String getTable(@Nullable Character[] border, Column @Nullable[] rawColumns, @Nullable Object @Nullable[][] data) {
         return builder().data(rawColumns, data).border(border).asString();
     }
 

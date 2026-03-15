@@ -1,10 +1,14 @@
 package com.github.freva.asciitable;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import java.util.function.Function;
 
+@NullMarked
 public class Column {
-    private String header;
-    private String footer;
+    private @Nullable String header;
+    private @Nullable String footer;
     private HorizontalAlign headerAlign;
     private HorizontalAlign dataAlign;
     private HorizontalAlign footerAlign;
@@ -18,12 +22,12 @@ public class Column {
     }
 
     @Deprecated
-    public Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
+    public Column(@Nullable String header, @Nullable String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
                   HorizontalAlign footerAlign, int maxWidth) {
         this(header, footer, headerAlign, dataAlign, footerAlign, 0, maxWidth, OverflowBehaviour.NEWLINE, true);
     }
 
-    Column(String header, String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
+    Column(@Nullable String header, @Nullable String footer, HorizontalAlign headerAlign, HorizontalAlign dataAlign,
            HorizontalAlign footerAlign, int minWidth, int maxWidth, OverflowBehaviour overflowBehaviour, boolean visible) {
         this.header = header;
         this.footer = footer;
@@ -36,11 +40,11 @@ public class Column {
         this.visible = visible;
     }
 
-    public String getHeader() {
+    public @Nullable String getHeader() {
         return header;
     }
 
-    public String getFooter() {
+    public @Nullable String getFooter() {
         return footer;
     }
 
@@ -79,12 +83,12 @@ public class Column {
     }
 
 
-    public Column header(String header) {
+    public Column header(@Nullable String header) {
         this.header = header;
         return this;
     }
 
-    public Column footer(String footer) {
+    public Column footer(@Nullable String footer) {
         this.footer = footer;
         return this;
     }
@@ -135,7 +139,7 @@ public class Column {
         return this;
     }
 
-    public <T> ColumnData<T> with(Function<T, String> getter) {
+    public <T extends @Nullable Object> ColumnData<T> with(Function<T, @Nullable String> getter) {
         return new ColumnData<T>(this, getter);
     }
 }

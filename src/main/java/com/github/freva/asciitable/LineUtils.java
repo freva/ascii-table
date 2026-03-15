@@ -7,7 +7,10 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+@NullMarked
 public class LineUtils {
 
     public static Stream<String> lines(String str) {
@@ -62,6 +65,7 @@ public class LineUtils {
         return lines;
     }
 
+    @NullMarked
     private static class LineIterator implements Iterator<String> {
         private final String str;
         private int position = 0;

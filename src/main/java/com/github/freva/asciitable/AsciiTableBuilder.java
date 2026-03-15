@@ -1,5 +1,8 @@
 package com.github.freva.asciitable;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,16 +13,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+@NullMarked
 public class AsciiTableBuilder {
 
     private String lineSeparator = System.lineSeparator();
-    private Character[] border = AsciiTable.BASIC_ASCII;
-    private Styler styler;
-    private String[] header;
-    private String[] footer;
-    private Column[] columns;
-    private Object[][] data;
-    private Integer maxTableWidth;
+    private @Nullable Character[] border = AsciiTable.BASIC_ASCII;
+    private @Nullable Styler styler;
+    private @Nullable String @Nullable[] header;
+    private @Nullable String @Nullable[] footer;
+    private Column @Nullable[] columns;
+    private @Nullable Object @Nullable[][] data;
+    private @Nullable Integer maxTableWidth;
 
     /** Set the line separator to use between table rows. Default is {@link System#lineSeparator()}. */
     public AsciiTableBuilder lineSeparator(String lineSeparator) {
@@ -28,7 +32,7 @@ public class AsciiTableBuilder {
     }
 
     /** Set the table border style. Default is {@link AsciiTable#BASIC_ASCII}. */
-    public AsciiTableBuilder border(Character[] border) {
+    public AsciiTableBuilder border(@Nullable Character[] border) {
         this.border = Objects.requireNonNull(border, "border cannot be null");
         return this;
     }
@@ -42,7 +46,7 @@ public class AsciiTableBuilder {
     /**
      * Set the table header cells, cannot be combined with setting column in
      * {@link AsciiTableBuilder#data(Collection, List)} or {@link AsciiTableBuilder#data(Column[], Object[][])} */
-    public AsciiTableBuilder header(String... header) {
+    public AsciiTableBuilder header(@Nullable String @Nullable... header) {
         this.header = header;
         return this;
     }
@@ -50,29 +54,35 @@ public class AsciiTableBuilder {
     /**
      * Set the table footer cells, cannot be combined with setting column in
      * {@link AsciiTableBuilder#data(Collection, List)} or {@link AsciiTableBuilder#data(Column[], Object[][])} */
-    public AsciiTableBuilder footer(String... footer) {
+    public AsciiTableBuilder footer(@Nullable String @Nullable... footer) {
         this.footer = footer;
         return this;
     }
 
-    public AsciiTableBuilder data(Object[][] data) {
+    public AsciiTableBuilder data(@Nullable Object @Nullable[][] data) {
         this.data = data;
         return this;
     }
 
-    public AsciiTableBuilder data(Column[] columns, Object[][] data) {
+    public AsciiTableBuilder data(Column @Nullable[] columns, @Nullable Object @Nullable[][] data) {
         this.columns = columns;
         this.data = data;
         return this;
     }
 
-    public <T> AsciiTableBuilder data(Collection<T> objects, List<ColumnData<T>> columns) {
+    public <T extends @Nullable Object> AsciiTableBuilder data(Collection<T> objects, List<ColumnData<T>> columns) {
         Column[] rawColumns = columns.toArray(new Column[0]);
-        String[][] data = objects.stream()
-                .map(object ->  columns.stream()
-                        .map(dataColumn ->  dataColumn.getCellValue(object))
-                        .toArray(String[]::new))
-                .toArray(String[][]::new);
+
+        @Nullable String[][] data = new String[objects.size()][];
+        @Nullable String[] current;
+        int i = 0;
+        for(T object: objects){
+            current = new String[columns.size()];
+            for(int j = 0; j < columns.size(); j++){
+                current[j] = columns.get(j).getCellValue(object);
+            }
+            data[i++] = current;
+        }
 
         return data(rawColumns, data);
     }
@@ -95,8 +105,8 @@ public class AsciiTableBuilder {
     public void writeTo(OutputStream os) {
         Column[] columns = this.columns;
         if (columns == null) {
-            String[] nonNullHeader = header != null ? header : new String[0];
-            String[] nonNullFooter = footer != null ? footer : new String[0];
+            @Nullable String[] nonNullHeader = header != null ? header : new String[0];
+            @Nullable String[] nonNullFooter = footer != null ? footer : new String[0];
 
             columns = IntStream.range(0, Math.max(nonNullHeader.length, nonNullFooter.length))
                     .mapToObj(index -> new Column()
