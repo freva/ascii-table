@@ -131,6 +131,11 @@ public class AsciiTable {
                                     case ELLIPSIS_LEFT: return Stream.of(ELLIPSIS + paragraph.substring(paragraph.length() - limit + 1));
                                     case ELLIPSIS:
                                     case ELLIPSIS_RIGHT: return Stream.of(paragraph.substring(0, limit - 1) + ELLIPSIS);
+                                    case ELLIPSIS_CENTER:
+                                        int keep = (limit - 1) / 2;
+                                        int prefixLen = keep;
+                                        int suffixLen = limit - 1 - prefixLen;
+                                        return Stream.of(paragraph.substring(0, prefixLen) + ELLIPSIS + paragraph.substring(paragraph.length() - suffixLen));
                                     default:
                                     case NEWLINE: return LineUtils.splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
                                 }

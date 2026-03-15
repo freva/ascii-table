@@ -9,12 +9,12 @@ Maven:
 <dependency>
   <groupId>com.github.freva</groupId>
   <artifactId>ascii-table</artifactId>
-  <version>1.9.0</version>
+  <version>1.10.0</version>
 </dependency>
 ```
 Gradle:
 ```
-compile 'com.github.freva:ascii-table:1.9.0'
+compile 'com.github.freva:ascii-table:1.10.0'
 ```
 
 ## Basic case
@@ -135,29 +135,30 @@ System.out.println(AsciiTable.getTable(planets, Arrays.asList(
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.CLIP_RIGHT).with(planet -> planet.atmosphere),
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_LEFT).with(planet -> planet.atmosphere),
         new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_RIGHT).with(planet -> planet.atmosphere))));
+        new Column().header("Atmosphere Composition").maxWidth(12, OverflowBehaviour.ELLIPSIS_CENTER).with(planet -> planet.atmosphere))));
 ```
 Prints
 ```
-+------------+------------+------------+------------+------------+
-| Atmosphere | omposition | Atmosphere | …mposition | Atmospher… |
-| Compositio |            |            |            |            |
-| n          |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|    minimal |    minimal |    minimal |    minimal |    minimal |
-+------------+------------+------------+------------+------------+
-|     Carbon | , Nitrogen | Carbon dio | … Nitrogen | Carbon di… |
-|   dioxide, |            |            |            |            |
-|   Nitrogen |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|  Nitrogen, | gen, Argon | Nitrogen,  | …en, Argon | Nitrogen,… |
-|    Oxygen, |            |            |            |            |
-|      Argon |            |            |            |            |
-+------------+------------+------------+------------+------------+
-|     Carbon | gen, Argon | Carbon dio | …en, Argon | Carbon di… |
-|   dioxide, |            |            |            |            |
-|  Nitrogen, |            |            |            |            |
-|      Argon |            |            |            |            |
-+------------+------------+------------+------------+------------+
++------------+------------+------------+------------+------------+------------+
+| Atmosphere | omposition | Atmosphere | …mposition | Atmospher… | Atmos…tion |
+| Compositio |            |            |            |            |            |
+| n          |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|    minimal |    minimal |    minimal |    minimal |    minimal |    minimal |
++------------+------------+------------+------------+------------+------------+
+|     Carbon | , Nitrogen | Carbon dio | … Nitrogen | Carbon di… | Carb…rogen |
+|   dioxide, |            |            |            |            |            |
+|   Nitrogen |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|  Nitrogen, | gen, Argon | Nitrogen,  | …en, Argon | Nitrogen,… | Nitr…Argon |
+|    Oxygen, |            |            |            |            |            |
+|      Argon |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
+|     Carbon | gen, Argon | Carbon dio | …en, Argon | Carbon di… | Carb…Argon |
+|   dioxide, |            |            |            |            |            |
+|  Nitrogen, |            |            |            |            |            |
+|      Argon |            |            |            |            |            |
++------------+------------+------------+------------+------------+------------+
 ```
 
 ## Max table width
