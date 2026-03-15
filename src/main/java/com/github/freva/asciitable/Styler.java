@@ -1,15 +1,12 @@
 package com.github.freva.asciitable;
 
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
-
 import java.util.List;
 
 /**
  * Allows styling the table by adding zero-width characters (e.g. ANSI escape codes)
  * to the content. This interface will be invoked just before the data is written,
  * the inputs are therefore already split into the lines and the text is justified.
- *
+ * <p>
  * WARNING: If any of the methods add any non-zero-width characters or remove any characters,
  * the table will be misaligned.
  */

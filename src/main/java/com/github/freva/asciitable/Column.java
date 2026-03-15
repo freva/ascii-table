@@ -140,6 +140,6 @@ public class Column {
     }
 
     public <T extends @Nullable Object> ColumnData<T> with(Function<T, @Nullable String> getter) {
-        return new ColumnData<T>(this, getter);
+        return new ColumnData<>(this, getter);
     }
 }

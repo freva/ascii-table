@@ -59,12 +59,12 @@ public class AsciiTableBuilder {
         return this;
     }
 
-    public AsciiTableBuilder data(@Nullable Object @Nullable[][] data) {
+    public AsciiTableBuilder data(@Nullable Object[][] data) {
         this.data = data;
         return this;
     }
 
-    public AsciiTableBuilder data(Column @Nullable[] columns, @Nullable Object @Nullable[][] data) {
+    public AsciiTableBuilder data(Column @Nullable[] columns, @Nullable Object[][] data) {
         this.columns = columns;
         this.data = data;
         return this;
@@ -74,13 +74,11 @@ public class AsciiTableBuilder {
         Column[] rawColumns = columns.toArray(new Column[0]);
 
         @Nullable String[][] data = new String[objects.size()][];
-        @Nullable String[] current;
         int i = 0;
-        for(T object: objects){
-            current = new String[columns.size()];
-            for(int j = 0; j < columns.size(); j++){
+        for (T object: objects) {
+            @Nullable String[] current = new String[columns.size()];
+            for (int j = 0; j < columns.size(); j++)
                 current[j] = columns.get(j).getCellValue(object);
-            }
             data[i++] = current;
         }
 
@@ -115,6 +113,9 @@ public class AsciiTableBuilder {
                     .toArray(Column[]::new);
         } else if (header != null || footer != null)
             throw new IllegalArgumentException("Cannot set both header/footer and columns");
+
+        if (data == null)
+            throw new IllegalArgumentException("Data must be set");
 
         try {
             OutputStreamWriter osw = new OutputStreamWriter(os);

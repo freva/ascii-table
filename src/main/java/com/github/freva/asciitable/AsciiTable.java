@@ -118,8 +118,8 @@ public class AsciiTable {
                                   @Nullable BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
-                    String text = i < contents.length? contents[i]: "";
-                           text = text != null? text: "";
+                    String text = i < contents.length ? contents[i]: "";
+                           text = text != null ? text: "";
                     return LineUtils.lines(text)
                             .flatMap(paragraph -> {
                                 int limit = colWidths[i] - 2 * PADDING;
@@ -133,8 +133,7 @@ public class AsciiTable {
                                     case ELLIPSIS:
                                     case ELLIPSIS_RIGHT: return Stream.of(paragraph.substring(0, limit - 1) + ELLIPSIS);
                                     case ELLIPSIS_CENTER:
-                                        int keep = (limit - 1) / 2;
-                                        int prefixLen = keep;
+                                        int prefixLen = (limit - 1) / 2;
                                         int suffixLen = limit - 1 - prefixLen;
                                         return Stream.of(paragraph.substring(0, prefixLen) + ELLIPSIS + paragraph.substring(paragraph.length() - suffixLen));
                                     default:
@@ -307,19 +306,19 @@ public class AsciiTable {
         return builder().data(objects, columns).border(border).asString();
     }
 
-    public static String getTable(@Nullable Object @Nullable[][] data) {
+    public static String getTable(@Nullable Object[][] data) {
         return builder().data(data).asString();
     }
 
-    public static String getTable(@Nullable String @Nullable[] header, @Nullable Object @Nullable[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable Object[][] data) {
         return builder().header(header).data(data).asString();
     }
 
-    public static String getTable(@Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
+    public static String getTable(@Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object[][] data) {
         return builder().header(header).footer(footer).data(data).asString();
     }
 
-    public static String getTable(@Nullable Character[] border, @Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object @Nullable[][] data) {
+    public static String getTable(@Nullable Character[] border, @Nullable String @Nullable[] header, @Nullable String @Nullable[] footer, @Nullable Object[][] data) {
         return builder().header(header).footer(footer).border(border).data(data).asString();
     }
 
@@ -327,7 +326,7 @@ public class AsciiTable {
         return builder().data(columns, data).asString();
     }
 
-    public static String getTable(@Nullable Character[] border, Column @Nullable[] rawColumns, @Nullable Object @Nullable[][] data) {
+    public static String getTable(@Nullable Character[] border, Column @Nullable[] rawColumns, @Nullable Object[][] data) {
         return builder().data(rawColumns, data).border(border).asString();
     }
 
