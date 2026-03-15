@@ -118,7 +118,8 @@ public class AsciiTable {
                                   @Nullable BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
         List<List<String>> linesContents = IntStream.range(0, colWidths.length)
                 .mapToObj(i -> {
-                    String text = i < contents.length && contents[i] != null ? contents[i] : "";
+                    String text = i < contents.length? contents[i]: "";
+                           text = text != null? text: "";
                     return LineUtils.lines(text)
                             .flatMap(paragraph -> {
                                 int limit = colWidths[i] - 2 * PADDING;
