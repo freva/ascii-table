@@ -98,7 +98,12 @@ public class AsciiTable {
             writeData(osw, colWidths, overflows, aligns, header, border[4], border[5], border[6], lineSeparator,
                     styler == null ? null : (col, rows) -> styler.styleHeader(columns[col], col, rows));
             osw.write(lineSeparator);
-            insertNewline = writeLine(osw, colWidths, border[7], border[8], border[9], border[10]);
+            if(border == MARKDOWN){//Identity comparison
+                insertNewline = true;
+                writeSepMarkdown(osw, colWidths, columns);
+            } else {
+                insertNewline = writeLine(osw, colWidths, border[7], border[8], border[9], border[10]);
+            }
         }
 
         HorizontalAlign[] dataAligns = Arrays.stream(columns).map(Column::getDataAlign).toArray(HorizontalAlign[]::new);
@@ -137,6 +142,32 @@ public class AsciiTable {
         }
         if (right != null) osw.append(right);
         return true;
+    }
+
+    private static void writeSepMarkdown(OutputStreamWriter osw, int[] colWidths, Column[] columns) throws IOException {
+        osw.append('|');
+        if(colWidths.length != columns.length){
+            throw new IllegalStateException("colWidths.length (" + colWidths.length + ") != columns.length (" + columns.length + ")");
+        }
+        for (int col = 0; col < colWidths.length; col++){
+            switch(columns[col].getDataAlign()){
+                case CENTER:
+                    osw.append(':');
+                    writeRepeated(osw, '-', colWidths[col]-2);
+                    osw.append(':');
+                    break;
+                case LEFT:
+                    osw.append(':');
+                    writeRepeated(osw, '-', colWidths[col]-1);
+                    break;
+                case RIGHT:
+                    writeRepeated(osw, '-', colWidths[col] -1);
+                    osw.append(':');
+                    break;
+            }
+            osw.write('|');
+        }
+
     }
 
     /**
@@ -308,6 +339,8 @@ public class AsciiTable {
 
     private static void writeRepeated(OutputStreamWriter osw, char c, int num) throws IOException {
         for (int i = 0; i < num; i++) osw.append(c);
+        char[] arr = new char[num];
+        Arrays.fill(arr, c);
     }
 
     private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object [][] array) {

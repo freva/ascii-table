@@ -1,5 +1,6 @@
 package com.github.freva.asciitable;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -755,6 +756,62 @@ public class AsciiTableTest {
                 " 4  Mar  0.  0.1  Carbon dio… ",
                 "      s        1              ");
         assertEquals(expected, AsciiTable.builder().data(colMaxW, data).border(AsciiTable.NO_BORDERS).maxTableWidth(30).asString());
+    }
+
+    @Test
+    public void markdownDefault(){
+
+        String[] headers = {"", "Name", "Diameter", "Mass", "Atmosphere"};
+        String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
+                {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
+                {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
+                {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
+        String expected = String.join(System.lineSeparator(),
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "|--:|--------:|---------:|-----:|--------------------------------:|",
+                "| 1 | Mercury |    0.382 | 0.06 |                         minimal |",
+                "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |"
+
+        );
+        String actual = AsciiTable.builder()
+                .border(AsciiTable.MARKDOWN)
+                .header(headers)
+                .data(data)
+                .asString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void markdownAlign(){
+        String[][] data = {{"1", "Mercury", "0.382", "0.06", "minimal"},
+                {"2", "Venus", "0.949", "0.82", "Carbon dioxide, Nitrogen"},
+                {"3", "Earth", "1.000", "1.00", "Nitrogen, Oxygen, Argon"},
+                {"4", "Mars", "0.532", "0.11", "Carbon dioxide, Nitrogen, Argon"}};
+
+        String expected = String.join(System.lineSeparator(),
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "|--:|--------:|:---------|-----:|:-------------------------------:|",
+                "| 1 | Mercury | 0.382    | 0.06 |             minimal             |",
+                "| 2 |   Venus | 0.949    | 0.82 |    Carbon dioxide, Nitrogen     |",
+                "| 3 |   Earth | 1.000    | 1.00 |     Nitrogen, Oxygen, Argon     |",
+                "| 4 |    Mars | 0.532    | 0.11 | Carbon dioxide, Nitrogen, Argon |"
+
+        );
+        Column[] columns = new Column[]{
+                new Column().header(""),
+                new Column().header("Name"),
+                new Column().header("Diameter").dataAlign(LEFT),
+                new Column().header("Mass"),
+                new Column().header("Atmosphere").dataAlign(CENTER)
+        };
+
+        String actual = AsciiTable.builder()
+                .border(AsciiTable.MARKDOWN)
+                .data(columns, data)
+                .asString();
+        assertEquals(expected, actual);
     }
 
     private static void assertParagraphs(OverflowBehaviour overflowBehaviour, String... expectedLines) {
