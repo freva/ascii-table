@@ -340,6 +340,34 @@ With `borderStyle = AsciiTable.FANCY_ASCII`, it prints
 ╚═══╧═════════╧══════════╧══════╧═════════════════════════════════╝
 ```
 ___
+With `boderStyle = AsciiTable.MARKDOWN`, it prints
+```
+|   |  Name   | Diameter | Mass | Atmosphere                      |
+|--:|--------:|:--------:|:-----|:-------------------------------:|
+| 1 | Mercury |  0.382   | 0.06 |             minimal             |
+| 2 |   Venus |  0.949   | 0.82 |    Carbon dioxide, Nitrogen     |
+| 3 |   Earth |  1.000   | 1.00 |     Nitrogen, Oxygen, Argon     |
+| 4 |    Mars |  0.532   | 0.11 | Carbon dioxide, Nitrogen, Argon |
+|   | Average |  0.716   | 0.50 |                                 |
+```
+, which then looks like this when rendered:
+
+|   |  Name   | Diameter | Mass | Atmosphere                      |
+|--:|--------:|:--------:|:-----|:-------------------------------:|
+| 1 | Mercury |  0.382   | 0.06 |             minimal             |
+| 2 |   Venus |  0.949   | 0.82 |    Carbon dioxide, Nitrogen     |
+| 3 |   Earth |  1.000   | 1.00 |     Nitrogen, Oxygen, Argon     |
+| 4 |    Mars |  0.532   | 0.11 | Carbon dioxide, Nitrogen, Argon |
+|   | Average |  0.716   | 0.50 |                                 |
+
+
+Using `AsciiTable.MARKDOWN` there are a couple of things to note:
+
+1. `OverflowBehaviour.NEWLINE` can mess up formatting. Its best to use the other behaviours or leave the newline-wrapping of table-cells to the rendering-engine displaying the table.
+2. Setting `HorizontalAlign` will modify the "raw" table, but when rendered only the alignment for the data matters. Furthermore the alignment always influences the entire column (so data, header and footer).
+3. Markdown tables do not know a footer. Setting one will produce a row that is not visually distingusished from the rest of the table.
+
+___
 
 Border styles is a `Character` array of length 29 and you can configure your own 
 styles by passing in different array. To see which element in `Character` array 

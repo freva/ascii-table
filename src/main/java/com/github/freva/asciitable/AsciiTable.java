@@ -38,7 +38,7 @@ public class AsciiTable {
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
-    //https://spec.commonmark.org/0.31.2/
+    //https://www.markdownlang.com/extended/tables.html
     public static final @Nullable Character[] MARKDOWN = {
             null, //A
             null, //B
@@ -144,6 +144,28 @@ public class AsciiTable {
         return true;
     }
 
+    /**
+     * Horizontal alignment for Markdown-tables happens in the row that separates the header from the data.
+     * <ul>
+     *     <li>{@link HorizontalAlign#LEFT}: {@code :--} or {@code ---}</li>
+     *     <li>{@link HorizontalAlign#CENTER}: {@code :--:}</li>
+     *     <li>{@link HorizontalAlign#RIGHT}: {@code --:}</li>
+     * </ul>
+     *
+     * Example:
+     * <pre>
+     *   | Left   | Center | Right  |
+     *   |:-------|:------:|-------:|
+     *   | ABCDEF | GHIJKL | MNOPQR |
+     *   | STUVWX | YZ1234 | 567890 |
+     * </pre>
+     * </p>
+     * (Source: https://www.markdownlang.com/extended/tables.html)
+     * @param osw the destination to write the separator-row into
+     * @param colWidths the maximum widths of the columns
+     * @param columns the columns the separator-row is created for
+     * @throws IOException when writing to osw incurs an IOException
+     */
     private static void writeSepMarkdown(OutputStreamWriter osw, int[] colWidths, Column[] columns) throws IOException {
         osw.append('|');
         if(colWidths.length != columns.length){
