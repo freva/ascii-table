@@ -38,6 +38,39 @@ public class AsciiTable {
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
+    //https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#tables
+    public static final @Nullable Character[] RE_STRUCTURED_TEXT = {
+            '+', //A
+            '-', //B
+            '+', //C
+            '+', //D
+            '|', //E
+            '|', //F
+            '|', //G
+            '+', //H
+            '=', //I
+            '+', //J
+            '+', //K
+            '|', //L
+            '|', //M
+            '|', //N
+            '+', //O
+            '-', //P
+            '+', //Q
+            '+', //R
+            '+', //S
+            '-', //T
+            '+', //U
+            '+', //V
+            '|', //W
+            '|', //X
+            '|', //Y
+            '+', //Z
+            '-', //1
+            '+', //2
+            '+'  //3
+    };
+
 
     static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {
         if (border.length != NO_BORDERS.length)

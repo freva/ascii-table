@@ -1,5 +1,6 @@
 package com.github.freva.asciitable;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -755,6 +756,41 @@ public class AsciiTableTest {
                 " 4  Mar  0.  0.1  Carbon dio… ",
                 "      s        1              ");
         assertEquals(expected, AsciiTable.builder().data(colMaxW, data).border(AsciiTable.NO_BORDERS).maxTableWidth(30).asString());
+    }
+
+    @Test
+    public void tableDefaultReStructuredText(){
+
+        String expected = String.join("\n",
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Name    | Diameter | Mass | Atmosphere                      |",
+                "+===+=========+==========+======+=================================+",
+                "| 1 | Mercury |    0.382 | 0.06 |                         minimal |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "| 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |",
+                "+---+---------+----------+------+---------------------------------+",
+                "|   | Average | 0.716    | 0.50 |                                 |",
+                "+---+---------+----------+------+---------------------------------+"
+        );
+
+        String actual = AsciiTable.getTable(
+                AsciiTable.RE_STRUCTURED_TEXT, planets,
+                Arrays.asList(
+                    new Column().with(planet -> Integer.toString(planet.num)),
+                    new Column().header("Name").footer("Average").with(planet -> planet.name),
+                    new Column().header("Diameter")
+                        .footer(String.format(Locale.US, "%.03f", planets.stream().mapToDouble(planet -> planet.diameter).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.03f", planet.diameter)),
+                    new Column().header("Mass")
+                        .footer(String.format(Locale.US, "%.02f", planets.stream().mapToDouble(planet -> planet.mass).average().orElse(0)))
+                        .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
+                     new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
+        Assertions.assertEquals(expected, actual);
+        System.out.println(actual);
     }
 
     private static void assertParagraphs(OverflowBehaviour overflowBehaviour, String... expectedLines) {
