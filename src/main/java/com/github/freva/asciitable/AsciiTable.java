@@ -7,10 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.nio.CharBuffer;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,7 +41,7 @@ public class AsciiTable {
         if (border.length != NO_BORDERS.length)
             throw new IllegalArgumentException("Border characters array must be exactly " + NO_BORDERS.length + " elements long");
 
-        String[][] stringData = objectArrayToString(rawColumns, data);
+        @Nullable String[][] stringData = objectArrayToString(rawColumns, data);
         int numColumns = getNumColumns(rawColumns, data);
         Column[] columns = IntStream.range(0, numColumns)
                 .mapToObj(index -> index < rawColumns.length ? rawColumns[index] : new Column())
@@ -274,8 +272,13 @@ public class AsciiTable {
     }
 
     private static void writeRepeated(OutputStreamWriter osw, char c, int num) throws IOException {
-        for (int i = 0; i < num; i++) osw.append(c);
+        char[] array = new char[num];
+        Arrays.fill(array, c);
+        CharBuffer b = CharBuffer.wrap(array);
+        osw.append(b);
     }
+
+
 
     private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object [][] array) {
         int[] numInvisible = new int[Math.max(1, columns.length)];
