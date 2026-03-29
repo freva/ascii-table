@@ -129,38 +129,28 @@ public class AsciiTable {
     public static final Character[] FANCY_ASCII = {'╔', '═', '╤', '╗', '║', '│', '║',  '╠', '═',
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
-    //https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#tables
-    public static final @Nullable Character[] RE_STRUCTURED_TEXT = {
-            '+', //A
-            '-', //B
-            '+', //C
-            '+', //D
-            '|', //E
-            '|', //F
-            '|', //G
-            '+', //H
-            '=', //I
-            '+', //J
-            '+', //K
-            '|', //L
-            '|', //M
-            '|', //N
-            '+', //O
-            '-', //P
-            '+', //Q
-            '+', //R
-            '+', //S
-            '-', //T
-            '+', //U
-            '+', //V
-            '|', //W
-            '|', //X
-            '|', //Y
-            '+', //Z
-            '-', //1
-            '+', //2
-            '+'  //3
-    };
+    /**
+     * Example:
+     * <pre>
+     * +---+---------+----------+------+---------------------------------+
+     * |   | Name    | Diameter | Mass | Atmosphere                      |
+     * +===+=========+==========+======+=================================+
+     * | 1 | Mercury |    0.382 | 0.06 |                         minimal |
+     * +---+---------+----------+------+---------------------------------+
+     * | 2 |   Venus |    0.949 | 0.82 |        Carbon dioxide, Nitrogen |
+     * +---+---------+----------+------+---------------------------------+
+     * | 3 |   Earth |    1.000 | 1.00 |         Nitrogen, Oxygen, Argon |
+     * +---+---------+----------+------+---------------------------------+
+     * | 4 |    Mars |    0.532 | 0.11 | Carbon dioxide, Nitrogen, Argon |
+     * +---+---------+----------+------+---------------------------------+
+     * |   | Average | 0.716    | 0.50 |                                 |
+     * +---+---------+----------+------+---------------------------------+
+     * </pre>
+     *
+     * @see <a href="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#tables">reStructuredText Markup Specification</a>
+     */
+    public static final Character[] RE_STRUCTURED_TEXT = {'+', '-', '+', '+', '|', '|', '|', '+', '=',
+            '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
 
     static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {

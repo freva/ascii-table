@@ -760,7 +760,6 @@ public class AsciiTableTest {
 
     @Test
     public void tableDefaultReStructuredText(){
-
         String expected = String.join("\n",
                 "+---+---------+----------+------+---------------------------------+",
                 "|   | Name    | Diameter | Mass | Atmosphere                      |",
@@ -790,7 +789,6 @@ public class AsciiTableTest {
                         .with(planet -> String.format(Locale.US, "%.02f", planet.mass)),
                      new Column().header("Atmosphere").with(planet -> planet.atmosphere)));
         Assertions.assertEquals(expected, actual);
-        System.out.println(actual);
     }
 
     private static void assertParagraphs(OverflowBehaviour overflowBehaviour, String... expectedLines) {
