@@ -130,37 +130,8 @@ public class AsciiTable {
             '╪', '╣', '║', '│', '║', '╟', '─', '┼', '╢', '╠', '═', '╪', '╣', '║', '│', '║', '╚', '═', '╧', '╝'};
 
     //https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#tables
-    public static final @Nullable Character[] RE_STRUCTURED_TEXT = {
-            '+', //A
-            '-', //B
-            '+', //C
-            '+', //D
-            '|', //E
-            '|', //F
-            '|', //G
-            '+', //H
-            '=', //I
-            '+', //J
-            '+', //K
-            '|', //L
-            '|', //M
-            '|', //N
-            '+', //O
-            '-', //P
-            '+', //Q
-            '+', //R
-            '+', //S
-            '-', //T
-            '+', //U
-            '+', //V
-            '|', //W
-            '|', //X
-            '|', //Y
-            '+', //Z
-            '-', //1
-            '+', //2
-            '+'  //3
-    };
+    public static final Character[] RE_STRUCTURED_TEXT = {'+', '-', '+', '+', '|', '|', '|', '+', '=',
+            '+', '+', '|', '|', '|', '+', '-', '+', '+', '+', '-', '+', '+', '|', '|', '|', '+', '-', '+', '+'};
 
 
     static void writeTable(OutputStreamWriter osw, String lineSeparator, @Nullable Character[] border, Column[] rawColumns, @Nullable Object[][] data, @Nullable Styler styler, @Nullable Integer maxTableWidth) throws IOException {
