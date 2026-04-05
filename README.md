@@ -9,12 +9,12 @@ Maven:
 <dependency>
   <groupId>com.github.freva</groupId>
   <artifactId>ascii-table</artifactId>
-  <version>1.11.0</version>
+  <version>1.12.0</version>
 </dependency>
 ```
 Gradle:
 ```
-compile 'com.github.freva:ascii-table:1.11.0'
+compile 'com.github.freva:ascii-table:1.12.0'
 ```
 
 ## Basic case
@@ -338,6 +338,24 @@ With `borderStyle = AsciiTable.FANCY_ASCII`, it prints
 ╠═══╪═════════╪══════════╪══════╪═════════════════════════════════╣
 ║   │ Average │  0.716   │ 0.50 │                                 ║
 ╚═══╧═════════╧══════════╧══════╧═════════════════════════════════╝
+```
+
+___
+With `borderStyle = AsciiTable.RE_STRUCTURED_TEXT`, it prints
+```
++---+---------+----------+------+---------------------------------+
+|   |  Name   | Diameter | Mass | Atmosphere                      |
++===+=========+==========+======+=================================+
+| 1 | Mercury |  0.382   | 0.06 |             minimal             |
++---+---------+----------+------+---------------------------------+
+| 2 |   Venus |  0.949   | 0.82 |    Carbon dioxide, Nitrogen     |
++---+---------+----------+------+---------------------------------+
+| 3 |   Earth |  1.000   | 1.00 |     Nitrogen, Oxygen, Argon     |
++---+---------+----------+------+---------------------------------+
+| 4 |    Mars |  0.532   | 0.11 | Carbon dioxide, Nitrogen, Argon |
++---+---------+----------+------+---------------------------------+
+|   | Average |  0.716   | 0.50 |                                 |
++---+---------+----------+------+---------------------------------+
 ```
 ___
 
