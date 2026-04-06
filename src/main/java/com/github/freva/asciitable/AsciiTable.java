@@ -392,8 +392,6 @@ public class AsciiTable {
         osw.append(b);
     }
 
-
-
     private static @Nullable String[][] objectArrayToString(Column[] columns, @Nullable Object [][] array) {
         int[] numInvisible = new int[Math.max(1, columns.length)];
         for (int i = 0; i < columns.length; i++)
