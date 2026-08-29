@@ -7,17 +7,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
-import java.nio.CharBuffer;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @NullMarked
 public class AsciiTable {
     private static final int PADDING = 1;
-    private static final char ELLIPSIS = '…';
 
     /**
      * Example:
@@ -224,7 +221,6 @@ public class AsciiTable {
      *  - Contents of a row exceed maxCharInLine for that row
      *  - Contents of a row we're already multiline
      */
-    @SuppressWarnings("deprecated")
     private static void writeData(OutputStreamWriter osw, int[] colWidths, OverflowBehaviour[] overflows, HorizontalAlign[] horizontalAligns,
                                    @Nullable String[] contents, @Nullable Character left, @Nullable Character columnSeparator, @Nullable Character right, String lineSeparator,
                                   @Nullable BiFunction<Integer, List<String>, List<String>> styler) throws IOException {
@@ -235,22 +231,7 @@ public class AsciiTable {
                     return LineUtils.lines(text)
                             .flatMap(paragraph -> {
                                 int limit = colWidths[i] - 2 * PADDING;
-                                if (paragraph.length() <= limit) return Stream.of(paragraph);
-
-                                switch (overflows[i]) {
-                                    case CLIP_LEFT: return Stream.of(paragraph.substring(paragraph.length() - limit));
-                                    case CLIP:
-                                    case CLIP_RIGHT: return Stream.of(paragraph.substring(0, limit));
-                                    case ELLIPSIS_LEFT: return Stream.of(ELLIPSIS + paragraph.substring(paragraph.length() - limit + 1));
-                                    case ELLIPSIS:
-                                    case ELLIPSIS_RIGHT: return Stream.of(paragraph.substring(0, limit - 1) + ELLIPSIS);
-                                    case ELLIPSIS_CENTER:
-                                        int prefixLen = (limit - 1) / 2;
-                                        int suffixLen = limit - 1 - prefixLen;
-                                        return Stream.of(paragraph.substring(0, prefixLen) + ELLIPSIS + paragraph.substring(paragraph.length() - suffixLen));
-                                    default:
-                                    case NEWLINE: return LineUtils.splitTextIntoLinesOfMaxLength(paragraph, limit).stream();
-                                }
+                                return overflows[i].apply(paragraph, limit);
                             })
                             .collect(Collectors.toList());
                 })
