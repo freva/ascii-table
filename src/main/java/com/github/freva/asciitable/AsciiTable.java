@@ -231,7 +231,7 @@ public class AsciiTable {
                     return LineUtils.lines(text)
                             .flatMap(paragraph -> {
                                 int limit = colWidths[i] - 2 * PADDING;
-                                return overflows[i].apply(paragraph, limit);
+                                return defaultIfNull(overflows[i], OverflowBehaviour.NEWLINE).apply(paragraph, limit);
                             })
                             .collect(Collectors.toList());
                 })
@@ -260,7 +260,11 @@ public class AsciiTable {
         }
     }
 
-    /** Returns the width of each column in the resulting table */
+    private static <T> T defaultIfNull(T source, T fallback) {
+        return source != null ? source : fallback;
+    }
+
+	/** Returns the width of each column in the resulting table */
     static int[] getColWidths(Column[] columns, @Nullable String[][] data, @Nullable Character[] border, @Nullable Integer maxTableWidth) {
         int[] result = new int[columns.length];
         String current;
